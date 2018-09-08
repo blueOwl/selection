@@ -12,6 +12,17 @@ MAX_GEN_TICK = 5000
 ENV_PRESS_PERIOD = 500
 MAX_CAPACITY = 500
 IMPECT_R = 4
+ENV_STRESS_COF = 1
+MUTATION_VAR = 0.05
+
+def range_filter(start, end):
+    def f(x):
+        if x < start: 
+            return start
+        if x > end:
+            return end
+        return x
+    return f
 
 def two_curve(x, l = 1):
     x = x  * 20 * -1 + 10
@@ -37,7 +48,7 @@ class GenModel(Model):
         self.her_max = MAX_CAPACITY
         self.ver_max = MAX_CAPACITY
         self.alpha12, self.alpha21 = 0.5, 0.5
-        self.env_press = (np.sin(np.linspace(0, np.pi * 2 * ENV_PRESS_PERIOD, MAX_GEN_TICK)) + 1 ) / 2 * 0.4
+        self.env_press = (np.sin(np.linspace(0, np.pi * 2 * ENV_PRESS_PERIOD, MAX_GEN_TICK)) + 1 ) / 2 * ENV_STRESS_COF
 
         # Create agents
         for i in range(self.num_agents):
@@ -122,13 +133,19 @@ class GenAgent(Agent):
     def check_life(self):
         if self.lifetime <= 0:
             self.die()
+    @staticmethod
+    def mutate_gen_info(info):
+        mu = np.array(list(map(range_filter(-1 * 2 * MUTATION_VAR, 2 * MUTATION_VAR), np.random.normal(0, MUTATION_VAR, 10))))
+        return np.array(list(map(range_filter(0,1), mu + info)))
 
     def get_gen_info_vetical(self):
-        return np.random.choice(self.gen_info, size=len(self.gen_info),  replace=True)
+        info = np.random.choice(self.gen_info, size=len(self.gen_info),  replace=True)
+        return self.mutate_gen_info(info)
 
     def get_gen_info_heri(self, pos):
         neighbour_info = np.concatenate([i.gen_info for i in self.model.grid.get_neighbors(pos, True, include_center=False, radius=IMPECT_R)])
-        return np.random.choice(neighbour_info, size=len(self.gen_info),  replace=True)
+        info = np.random.choice(neighbour_info, size=len(self.gen_info),  replace=True)
+        return self.mutate_gen_info(info)
 
 
     def gener_sus(self):
@@ -143,12 +160,14 @@ class GenAgent(Agent):
         self.model.grid.place_agent(sus, pos)
 
     def get_gener_p(self):
-        return self.model.gr_rate[self.gen_type]
+        uni_gr_rate = self.model.gr_rate[self.gen_type]
+        self_gen_cof = 0.5 + two_curve(np.mean(self.gen_info)) * 0.5
+        return uni_gr_rate * self_gen_cof
 
     def check_env_press(self):
         press = self.model.cur_press
         coin = np.random.random()
-        if press - np.max(self.gen_info)  > coin:
+        if press - np.mean(self.gen_info)  > coin:
             self.lifetime = 0
 
     def step(self):
