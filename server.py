@@ -19,7 +19,7 @@ def agent_portrayal(agent):
         portrayal["Color"] = "blue"
     return portrayal
 
-grid = CanvasGrid(agent_portrayal, 100, 100, 500, 500)
+grid = CanvasGrid(agent_portrayal, 300, 300, 900, 900)
 
 chart = ChartModule([{"Label": "two type ratio",
                       "Color": "Black"}],
@@ -29,5 +29,5 @@ chart = ChartModule([{"Label": "two type ratio",
 server = ModularServer(GenModel,
                        [grid, chart],
                        "Gen Model",
-                       {"N": 200  , 'width':100, 'height':100})
+                       {"N": 200  , 'width':300, 'height':300})
 

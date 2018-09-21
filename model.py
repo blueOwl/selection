@@ -1,5 +1,6 @@
 # model.py
 import random
+import math
 import numpy as np
 from mesa.space import MultiGrid, Grid
 from mesa import Agent, Model
@@ -9,11 +10,20 @@ from mesa.datacollection import DataCollector
 GEN_INFO_SIZE = 10
 LIFE_TIME = 3
 MAX_GEN_TICK = 5000
-ENV_PRESS_PERIOD = 500
-MAX_CAPACITY = 500
+ENV_PRESS_PERIOD = 100
+MAX_CAPACITY = 1000
 IMPECT_R = 4
 ENV_STRESS_COF = 1
 MUTATION_VAR = 0.05
+
+T_MAX, T_MIN, T_OPT = 1, -2, 0
+ALPHA = math.log(2) / math.log((T_MAX - T_MIN) / (T_OPT - T_MIN))
+
+def beta(T, tp):
+    beta_l = {0:1, 1:0.8}
+    #tp is agent type, 0 is vertical, 1 is herizontal
+    l = beta_l[tp]
+    return l * (2 * (T - T_MIN)**ALPHA * (T_OPT - T_MIN)**(2 * ALPHA)) / (T_OPT - T_MIN)**(2 * ALPHA)
 
 def range_filter(start, end):
     def f(x):
@@ -49,6 +59,10 @@ class GenModel(Model):
         self.ver_max = MAX_CAPACITY
         self.alpha12, self.alpha21 = 0.5, 0.5
         self.env_press = (np.sin(np.linspace(0, np.pi * 2 * ENV_PRESS_PERIOD, MAX_GEN_TICK)) + 1 ) / 2 * ENV_STRESS_COF
+        #this is how enviroment values generated
+        #all values are chosen from a rescaled sin functions
+        #total periods for this sin is ENV_PRESS_PERIOD
+        #total values number's are MAX_GEN_TICK
 
         # Create agents
         for i in range(self.num_agents):
@@ -87,9 +101,9 @@ class GenModel(Model):
         cur_popu = self.get_popu_size()
         her_popu = self.get_her_popu_size()
         ver_popu = self.get_ver_popu_size()
-        r1, r2 = self.get_r()
-        ver_rate = r1 * (self.ver_max - ver_popu - self.alpha21 * her_popu)/self.ver_max
-        her_rate = r2 * (self.her_max - her_popu - self.alpha12 * ver_popu)/self.her_max
+        #r1, r2 = self.get_r()
+        ver_rate = (self.ver_max - ver_popu - self.alpha21 * her_popu)/self.ver_max
+        her_rate = (self.her_max - her_popu - self.alpha12 * ver_popu)/self.her_max
         print("popu and rate:")
         print(ver_popu, ver_rate)
         print(her_popu, her_rate)
@@ -161,7 +175,8 @@ class GenAgent(Agent):
 
     def get_gener_p(self):
         uni_gr_rate = self.model.gr_rate[self.gen_type]
-        self_gen_cof = 0.5 + two_curve(np.mean(self.gen_info)) * 0.5
+        #self_gen_cof = 0.5 + two_curve(np.mean(self.gen_info)) * 0.5
+        self_gen_cof = beta(np.mean(self.gen_info) - self.model.cur_press, self.gen_type)
         return uni_gr_rate * self_gen_cof
 
     def check_env_press(self):
