@@ -102,6 +102,8 @@ class GenModel(Model):
         her_popu = self.get_her_popu_size()
         ver_popu = self.get_ver_popu_size()
         #r1, r2 = self.get_r()
+        #ver_rate = r1 * (self.ver_max - ver_popu - self.alpha21 * her_popu)/self.ver_max
+        #her_rate = r2 * (self.her_max - her_popu - self.alpha12 * ver_popu)/self.her_max
         ver_rate = (self.ver_max - ver_popu - self.alpha21 * her_popu)/self.ver_max
         her_rate = (self.her_max - her_popu - self.alpha12 * ver_popu)/self.her_max
         print("popu and rate:")
