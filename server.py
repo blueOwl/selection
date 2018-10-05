@@ -19,15 +19,21 @@ def agent_portrayal(agent):
         portrayal["Color"] = "blue"
     return portrayal
 
-grid = CanvasGrid(agent_portrayal, 300, 300, 900, 900)
+grid = CanvasGrid(agent_portrayal, 100, 100, 500, 500)
 
-chart = ChartModule([{"Label": "two type ratio",
-                      "Color": "Black"}],
+chart1 = ChartModule([{"Label": "two type ratio (ver/total)",
+                      "Color": "Black"}, 
+		      {"Label": "env press", "Color": "Red"}],
+                      data_collector_name='datacollector')
+
+chart2 = ChartModule([{"Label": "horizontal generate mean prob",
+                      "Color": "Red"}, 
+		      {"Label": "vertical generate mean prob", "Color": "Blue"}],
                       data_collector_name='datacollector')
 
 
 server = ModularServer(GenModel,
-                       [grid, chart],
+                       [grid, chart1, chart2],
                        "Gen Model",
-                       {"N": 200  , 'width':300, 'height':300})
+                       {"N": 200  , 'width':100, 'height':100})
 

@@ -20,10 +20,11 @@ T_MAX, T_MIN, T_OPT = 1, -2, 0
 ALPHA = math.log(2) / math.log((T_MAX - T_MIN) / (T_OPT - T_MIN))
 
 def beta(T, tp):
+    #if T < 0: T = -1 * T
     beta_l = {0:1, 1:0.8}
     #tp is agent type, 0 is vertical, 1 is herizontal
     l = beta_l[tp]
-    return l * (2 * (T - T_MIN)**ALPHA * (T_OPT - T_MIN)**(2 * ALPHA)) / (T_OPT - T_MIN)**(2 * ALPHA)
+    return l * ((2 * (-T - T_MIN)**ALPHA *(2 ** ALPHA)) - (-T - T_MIN) ** (2 * ALPHA)) / ((T_OPT - T_MIN)**(2 * ALPHA))
 
 def range_filter(start, end):
     def f(x):
@@ -43,6 +44,14 @@ def compute_type_ratio(model):
     h_count = np.sum([agent.gen_type for agent in model.schedule.agents])
     total = model.schedule.get_agent_count()
     return h_count * 1.0 / total
+
+def get_cur_press(model):
+    return model.cur_press
+
+def compute_mean_her_prob(model):
+    return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 0])
+def compute_mean_ver_prob(model):
+    return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 1])
 
 class GenModel(Model):
     """A model with some number of agents."""
@@ -75,7 +84,10 @@ class GenModel(Model):
 
         #collect data
         self.datacollector = DataCollector(
-                model_reporters = {"two type ratio": compute_type_ratio})
+                model_reporters = {"two type ratio (ver/total)": compute_type_ratio, 
+				   "env press": get_cur_press,
+				   "horizontal generate mean prob": compute_mean_her_prob,
+				   "vertical generate mean prob": compute_mean_ver_prob})
 
     def get_r(self):
         env = self.cur_press
@@ -117,13 +129,13 @@ class GenModel(Model):
         self.cur_press, self.env_press = self.env_press[0], self.env_press[1:]
 
     def step(self):
-        self.datacollector.collect(self)
-        print("population size: ", self.get_popu_size())
         if (self.schedule.steps + 1) % 3 == 0:
             self.press = True
         else:
             self.press = False
         self.init_env()
+        self.datacollector.collect(self)
+        print("population size: ", self.get_popu_size())
         print("env pressure", self.cur_press)
         self.gr_rate = self.get_gr_rate()
         if self.press:print("env die")
@@ -141,6 +153,7 @@ class GenAgent(Agent):
             #0 is vertical, 1 is herizontal
         else:
             self.gen_type = random.choice(range(2))
+        self.p = 0
 
     def die(self):
         self.model.grid.remove_agent(self)
@@ -190,9 +203,9 @@ class GenAgent(Agent):
     def step(self):
         self.lifetime -= 1
         coin = np.random.random()
-        p = self.get_gener_p()
+        self.p = self.get_gener_p()
         #print(coin, p)
-        if coin < p:
+        if coin < self.p:
             self.gener_sus()
         if self.model.press:
             self.check_env_press()
