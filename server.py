@@ -31,9 +31,15 @@ chart2 = ChartModule([{"Label": "horizontal generate mean prob",
 		      {"Label": "vertical generate mean prob", "Color": "Blue"}],
                       data_collector_name='datacollector')
 
+chart3 = ChartModule([{"Label": "horizontal generate mean info",
+                      "Color": "Red"}, 
+		      {"Label": "vertical generate mean info", "Color": "Blue"}],
+                      data_collector_name='datacollector')
+
+
 
 server = ModularServer(GenModel,
-                       [grid, chart1, chart2],
+                       [grid, chart1, chart2, chart3],
                        "Gen Model",
                        {"N": 200  , 'width':100, 'height':100})
 

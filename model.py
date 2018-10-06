@@ -1,4 +1,5 @@
 # model.py
+# gene info list length and mutate number per generation
 import random
 import math
 import numpy as np
@@ -8,11 +9,13 @@ from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
 
 GEN_INFO_SIZE = 10
+MUT_GEN_LENGHT = 10
+# gene info list length and mutate number per generation
 LIFE_TIME = 3
 MAX_GEN_TICK = 5000
 ENV_PRESS_PERIOD = 100
 MAX_CAPACITY = 1000
-IMPECT_R = 4
+IMPECT_R = 6
 ENV_STRESS_COF = 1
 MUTATION_VAR = 0.05
 
@@ -53,6 +56,11 @@ def compute_mean_her_prob(model):
 def compute_mean_ver_prob(model):
     return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 1])
 
+def compute_mean_her_geneinfo(model):
+    return np.mean([np.mean(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 0])
+def compute_mean_ver_geneinfo(model):
+    return np.mean([np.mean(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 1])
+
 class GenModel(Model):
     """A model with some number of agents."""
     def __init__(self, N, width, height):
@@ -87,7 +95,9 @@ class GenModel(Model):
                 model_reporters = {"two type ratio (ver/total)": compute_type_ratio, 
 				   "env press": get_cur_press,
 				   "horizontal generate mean prob": compute_mean_her_prob,
-				   "vertical generate mean prob": compute_mean_ver_prob})
+				   "vertical generate mean prob": compute_mean_ver_prob,
+				   "horizontal generate mean info": compute_mean_her_geneinfo,
+				   "vertical generate mean info": compute_mean_ver_geneinfo })
 
     def get_r(self):
         env = self.cur_press
@@ -164,8 +174,10 @@ class GenAgent(Agent):
             self.die()
     @staticmethod
     def mutate_gen_info(info):
-        mu = np.array(list(map(range_filter(-1 * 2 * MUTATION_VAR, 2 * MUTATION_VAR), np.random.normal(0, MUTATION_VAR, 10))))
-        return np.array(list(map(range_filter(0,1), mu + info)))
+        mu = np.array(list(map(range_filter(-1 * 2 * MUTATION_VAR, 2 * MUTATION_VAR), np.random.normal(0, MUTATION_VAR, MUT_GEN_LENGHT))))
+        indexes = np.array(range(GEN_INFO_SIZE))
+        info[np.random.choice(indexes, MUT_GEN_LENGHT)] += mu 
+        return np.array(list(map(range_filter(0,1), info)))
 
     def get_gen_info_vetical(self):
         info = np.random.choice(self.gen_info, size=len(self.gen_info),  replace=True)
