@@ -52,14 +52,15 @@ def get_cur_press(model):
     return model.cur_press
 
 def compute_mean_her_prob(model):
-    return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 0])
-def compute_mean_ver_prob(model):
     return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 1])
 
+def compute_mean_ver_prob(model):
+    return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 0])
+
 def compute_mean_her_geneinfo(model):
-    return np.mean([np.mean(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 0])
-def compute_mean_ver_geneinfo(model):
     return np.mean([np.mean(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 1])
+def compute_mean_ver_geneinfo(model):
+    return np.mean([np.mean(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 0])
 
 class GenModel(Model):
     """A model with some number of agents."""
@@ -92,7 +93,7 @@ class GenModel(Model):
 
         #collect data
         self.datacollector = DataCollector(
-                model_reporters = {"two type ratio (ver/total)": compute_type_ratio, 
+                model_reporters = {"two type ratio (hor/total)": compute_type_ratio, 
 				   "env press": get_cur_press,
 				   "horizontal generate mean prob": compute_mean_her_prob,
 				   "vertical generate mean prob": compute_mean_ver_prob,
