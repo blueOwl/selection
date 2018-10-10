@@ -21,7 +21,7 @@ def agent_portrayal(agent):
 
 grid = CanvasGrid(agent_portrayal, 100, 100, 500, 500)
 
-chart1 = ChartModule([{"Label": "two type ratio (ver/total)",
+chart1 = ChartModule([{"Label": "two type ratio (hor/total)",
                       "Color": "Black"}, 
 		      {"Label": "env press", "Color": "Red"}],
                       data_collector_name='datacollector')
@@ -33,7 +33,8 @@ chart2 = ChartModule([{"Label": "horizontal generate mean prob",
 
 chart3 = ChartModule([{"Label": "horizontal generate mean info",
                       "Color": "Red"}, 
-		      {"Label": "vertical generate mean info", "Color": "Blue"}],
+		      {"Label": "vertical generate mean info", "Color": "Blue"},
+                           {"Label": "env press", "Color": "Black"}],
                       data_collector_name='datacollector')
 
 

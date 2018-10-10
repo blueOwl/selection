@@ -25,7 +25,7 @@ ALPHA = math.log(2) / math.log((T_MAX - T_MIN) / (T_OPT - T_MIN))
 def beta(T, tp):
     #if T < 0: T = -1 * T
     beta_l = {0:1, 1:0.8}
-    #tp is agent type, 0 is vertical, 1 is herizontal
+    #tp is agent type, 0 is vertical, 1 is horizontal
     l = beta_l[tp]
     return l * ((2 * (-T - T_MIN)**ALPHA *(2 ** ALPHA)) - (-T - T_MIN) ** (2 * ALPHA)) / ((T_OPT - T_MIN)**(2 * ALPHA))
 
