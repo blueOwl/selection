@@ -72,6 +72,15 @@ def compute_mean_her_geneinfo(model):
 def compute_mean_ver_geneinfo(model):
     return np.mean([np.mean(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 0])
 
+def compute_max_her_geneinfo(model):
+    return np.mean([np.max(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 1])
+def compute_max_ver_geneinfo(model):
+    return np.mean([np.max(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 0])
+def compute_min_her_geneinfo(model):
+    return np.mean([np.min(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 1])
+def compute_min_ver_geneinfo(model):
+    return np.mean([np.min(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 0])
+
 class GenModel(Model):
     """A model with some number of agents."""
     def __init__(self, N, width, height):
@@ -104,11 +113,17 @@ class GenModel(Model):
         #collect data
         self.datacollector = DataCollector(
                 model_reporters = {"two type ratio (hor/total)": compute_type_ratio, 
-				   "env press": get_cur_press,
-				   "horizontal generate mean prob": compute_mean_her_prob,
-				   "vertical generate mean prob": compute_mean_ver_prob,
-				   "horizontal generate mean info": compute_mean_her_geneinfo,
-				   "vertical generate mean info": compute_mean_ver_geneinfo })
+                   "env press": get_cur_press,
+                   "horizontal generate mean prob": compute_mean_her_prob,
+                   "vertical generate mean prob": compute_mean_ver_prob,
+                   "horizontal gene mean info": compute_mean_her_geneinfo,
+                   "vertical gene mean info": compute_mean_ver_geneinfo,
+                   "horizontal gene max info": compute_max_her_geneinfo,
+                   "vertical gene max info": compute_max_ver_geneinfo,
+                   "horizontal gene min info": compute_min_her_geneinfo,
+                   "vertical gene min info": compute_min_ver_geneinfo
+                    })
+
 
     def get_r(self):
         env = self.cur_press
