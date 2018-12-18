@@ -197,7 +197,8 @@ class GenAgent(Agent):
 
     def get_local_env_volume_gr_rate(self):
         neighbours = [agent.gen_type for agent in self.model.grid.get_neighbors(self.pos, True, include_center=False, radius=ENV_R)]
-        vert_popu, horz_popu = len(neighbours), np.sum(neighbours)
+        popu, horz_popu = len(neighbours), np.sum(neighbours)
+        vert_popu = popu - horz_popu
         vert_rate = (VERT_MAX - vert_popu - ALPHA21 * horz_popu)/VERT_MAX
         horz_rate = (HORZ_MAX - horz_popu - ALPHA12 * vert_popu)/HORZ_MAX
         return (vert_rate, horz_rate)
