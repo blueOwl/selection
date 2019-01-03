@@ -168,7 +168,7 @@ class GenModel(Model):
         if (self.schedule.steps + 1) % 3 == 0:
             self.press = True
         else:
-            self.press = False
+            self.press = True
         self.init_env()
         self.datacollector.collect(self)
         print("population size: ", self.get_popu_size())
@@ -212,7 +212,8 @@ class GenAgent(Agent):
 
     def get_local_env_volume_gr_rate(self):
         neighbours = [agent.gen_type for agent in self.model.grid.get_neighbors(self.pos, True, include_center=False, radius=ENV_R)]
-        vert_popu, horz_popu = len(neighbours), np.sum(neighbours)
+        popu, horz_popu = len(neighbours), np.sum(neighbours)
+        vert_popu = popu - horz_popu
         vert_rate = (VERT_MAX - vert_popu - ALPHA21 * horz_popu)/VERT_MAX
         horz_rate = (HORZ_MAX - horz_popu - ALPHA12 * vert_popu)/HORZ_MAX
         return (vert_rate, horz_rate)
@@ -233,7 +234,7 @@ class GenAgent(Agent):
         return np.array(probs) / (1.0 * sum(probs))
 
     def gener_sus(self):
-	#agent make a child
+    #agent make a child
         next_gen_num = self.generation_num + 1
         neighborhood = self.model.grid.get_neighborhood(self.pos, True, include_center=False, radius=IMPECT_R)
         pos_idx = np.random.choice(range(len(neighborhood)), 1, p=self.get_pos_dis(len(neighborhood), POS_DIS), replace=False)
@@ -247,8 +248,8 @@ class GenAgent(Agent):
         self.model.grid.place_agent(sus, pos)
 
     def get_gener_p(self):
-	#total growth prob
-	#enviroment size growth rate * genetic infor coef
+    #total growth prob
+    #enviroment size growth rate * genetic infor coef
         env_gr_rate = self.get_local_env_volume_gr_rate()[self.gen_type]
         #self_gen_cof = 0.5 + two_curve(np.mean(self.gen_info)) * 0.5
         self_gen_cof = beta(np.mean(self.gen_info) - self.model.cur_press, self.gen_type)
@@ -258,7 +259,7 @@ class GenAgent(Agent):
     def check_env_press(self):
         press = self.model.cur_press
         coin = np.random.random()
-        if press - np.mean(self.gen_info)  > coin:
+        if beta(np.mean(self.gen_info) - self.model.cur_press, 1)  < coin: 
             self.lifetime = 0
 
     def check_life(self):
@@ -269,7 +270,7 @@ class GenAgent(Agent):
             self.die()
             return False
         return True
-	
+    
     def step(self):
         #agent behavior 
         # 1. check whether still alive
@@ -284,22 +285,3 @@ class GenAgent(Agent):
             if coin < self.p:
                 self.gener_sus()
 
-
-'''
-class EnvGrid(MultiGrid):
-    @staticmethod
-    def default_val():
-        return []
-    def __init__(self, width, height, info_length):
-        self.info_length = info_length
-        super().__init__(width, height, True)
-
-    def add_info(self, pos, info):
-        x, y = pos
-        for i in info:
-            if len(self.grid[x][y]) <= self.info_length:
-                self.grid[x][y].append(i)
-            else:
-                self.grid[x][y].pop(0)
-                self.grid[x][y].append(i)
-'''
