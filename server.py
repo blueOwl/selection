@@ -47,8 +47,12 @@ chart4 = ChartModule([{"Label": "horizontal gene max info",
                            ],
                       data_collector_name='datacollector')
 
+chart5 = ChartModule([ {"Label": "vertical num", "Color": "Purple"},
+			{"Label": "horizontal num", "Color": "Green"}],
+                      data_collector_name='datacollector')
+
 
 server = ModularServer(GenModel,
-                       [grid, chart1, chart2, chart3,chart4],
+                       [grid, chart1, chart2, chart3, chart4, chart5],
                        "Gen Model",
                        {"N": 200  , 'width':100, 'height':100})

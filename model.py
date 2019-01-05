@@ -53,13 +53,14 @@ def two_curve(x, l = 1):
     k = 0.4
     return l / (1 + np.exp(1) ** ((-k) * x)) * 0.5
 
+
+def get_cur_press(model):
+    return model.cur_press
+
 def compute_type_ratio(model):
     h_count = np.sum([agent.gen_type for agent in model.schedule.agents])
     total = model.schedule.get_agent_count()
     return h_count * 1.0 / total
-
-def get_cur_press(model):
-    return model.cur_press
 
 def compute_mean_her_prob(model):
     return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 1])
@@ -67,17 +68,27 @@ def compute_mean_her_prob(model):
 def compute_mean_ver_prob(model):
     return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 0])
 
+def compute_her_num(model):
+    return len([agent.p for agent in model.schedule.agents if agent.gen_type == 1])
+
+def compute_ver_num(model):
+    return len([agent.p for agent in model.schedule.agents if agent.gen_type == 0])
+
 def compute_mean_her_geneinfo(model):
     return np.mean([np.mean(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 1])
+
 def compute_mean_ver_geneinfo(model):
     return np.mean([np.mean(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 0])
 
 def compute_max_her_geneinfo(model):
     return np.mean([np.max(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 1])
+
 def compute_max_ver_geneinfo(model):
     return np.mean([np.max(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 0])
+
 def compute_min_her_geneinfo(model):
     return np.mean([np.min(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 1])
+
 def compute_min_ver_geneinfo(model):
     return np.mean([np.min(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 0])
 
@@ -115,7 +126,9 @@ class GenModel(Model):
                 model_reporters = {"two type ratio (hor/total)": compute_type_ratio, 
                    "env press": get_cur_press,
                    "horizontal generate mean prob": compute_mean_her_prob,
+                   "horizontal num": compute_her_num,
                    "vertical generate mean prob": compute_mean_ver_prob,
+                   "vertical num": compute_ver_num,
                    "horizontal gene mean info": compute_mean_her_geneinfo,
                    "vertical gene mean info": compute_mean_ver_geneinfo,
                    "horizontal gene max info": compute_max_her_geneinfo,
@@ -165,16 +178,15 @@ class GenModel(Model):
         self.cur_press, self.env_press = self.env_press[0], self.env_press[1:]
 
     def step(self):
-        if (self.schedule.steps + 1) % 3 == 0:
-            self.press = True
-        else:
-            self.press = True
+        #if (self.schedule.steps + 1) % 3 == 0:
+        #    self.press = True
+        self.press = True
         self.init_env()
         self.datacollector.collect(self)
         print("population size: ", self.get_popu_size())
         print("env pressure", self.cur_press)
         #self.gr_rate = self.get_gr_rate()
-        if self.press:print("env die")
+        #if self.press:print("env die")
         self.schedule.step()
 
 class GenAgent(Agent):
@@ -216,6 +228,7 @@ class GenAgent(Agent):
         vert_popu = popu - horz_popu
         vert_rate = (VERT_MAX - vert_popu - ALPHA21 * horz_popu)/VERT_MAX
         horz_rate = (HORZ_MAX - horz_popu - ALPHA12 * vert_popu)/HORZ_MAX
+        print(vert_rate, horz_rate)
         return (vert_rate, horz_rate)
 
 
