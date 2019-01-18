@@ -12,15 +12,15 @@ GEN_INFO_SIZE = 10
 MUT_GEN_LENGHT = 10
 # gene info list length and mutate number per generation
 LIFE_TIME = 3
-MAX_GEN_TICK = 5000
-ENV_PRESS_PERIOD = 100
+MAX_GEN_TICK = 2001
+ENV_PRESS_PERIOD = 500
 MAX_CAPACITY = 1000
 IMPECT_R = 6
 ENV_R = 10
 ENV_STRESS_COF = 1
 MUTATION_VAR = 0.05
 
-T_MAX, T_MIN, T_OPT = 1, -2, 0
+T_MAX, T_MIN, T_OPT = 1, -1, 0
 ALPHA = math.log(2) / math.log((T_MAX - T_MIN) / (T_OPT - T_MIN))
 
 #global var control env growth rate
@@ -37,7 +37,12 @@ def beta(T, tp):
     beta_l = {0:1, 1:0.8}
     #tp is agent type, 0 is vertical, 1 is horizontal
     l = beta_l[tp]
-    return l * ((2 * (-T - T_MIN)**ALPHA *(2 ** ALPHA)) - (-T - T_MIN) ** (2 * ALPHA)) / ((T_OPT - T_MIN)**(2 * ALPHA))
+    return l * ((2 * (T - T_MIN)**ALPHA *(T_OPT-T_MIN)** ALPHA) - (T - T_MIN) ** (2 * ALPHA)) / ((T_OPT - T_MIN)**(2 * ALPHA))
+
+def beta_death(T):
+   
+    return ((2 * (T - T_MIN)**ALPHA *(T_OPT-T_MIN)** ALPHA) - (T - T_MIN) ** (2 * ALPHA)) / ((T_OPT - T_MIN)**(2 * ALPHA))
+
 
 def range_filter(start, end):
     def f(x):
@@ -48,17 +53,17 @@ def range_filter(start, end):
         return x
     return f
 
-def two_curve(x, l = 1):
-    x = x  * 20 * -1 + 10
-    k = 0.4
-    return l / (1 + np.exp(1) ** ((-k) * x)) * 0.5
+#def two_curve(x, l = 1):
+ #   x = x  * 20 * -1 + 10
+  #  k = 0.4
+   # return l / (1 + np.exp(1) ** ((-k) * x)) * 0.5
 
 
 def get_cur_press(model):
     return model.cur_press
 
 def compute_type_ratio(model):
-    h_count = np.sum([agent.gen_type for agent in model.schedule.agents])
+    h_count = np.sum([agent.gen_type for agent in model.schedule.agents])#？？？
     total = model.schedule.get_agent_count()
     return h_count * 1.0 / total
 
@@ -102,7 +107,7 @@ class GenModel(Model):
         self.uid = self.num_agents
 
         #model para
-        self.r1, self.r2 = 1.0, 1.0
+        #self.r1, self.r2 = 1.0, 1.0
         #self.her_max = MAX_CAPACITY
         #self.ver_max = MAX_CAPACITY
         #self.alpha12, self.alpha21 = 0.5, 0.5
@@ -138,10 +143,10 @@ class GenModel(Model):
                     })
 
 
-    def get_r(self):
-        env = self.cur_press
-        r1, r2 = 1 - two_curve(env), 1 - two_curve(env, 0.8)
-        return r1, r2
+   # def get_r(self):
+     #   env = self.cur_press
+    #    r1, r2 = 1 - two_curve(env), 1 - two_curve(env, 0.8)
+      #  return r1, r2
 
     def get_uid(self):
         uid = self.uid
@@ -207,7 +212,7 @@ class GenAgent(Agent):
         self.model.schedule.remove(self)
 
     @staticmethod
-    def mutate_gen_info(info):
+    def mutate_gen_info(info):#？？？mutate before resample
         mu = np.array(list(map(range_filter(-1 * 2 * MUTATION_VAR, 2 * MUTATION_VAR), np.random.normal(0, MUTATION_VAR, MUT_GEN_LENGHT))))
         indexes = np.array(range(GEN_INFO_SIZE))
         info[np.random.choice(indexes, MUT_GEN_LENGHT)] += mu 
@@ -218,13 +223,13 @@ class GenAgent(Agent):
         return self.mutate_gen_info(info)
 
     def get_gen_info_heri(self, pos):
-        neighbour_info = np.concatenate([i.gen_info for i in self.model.grid.get_neighbors(pos, True, include_center=False, radius=IMPECT_R)])
+        neighbour_info = np.concatenate([i.gen_info for i in self.model.grid.get_neighbors(pos, True, include_center=True, radius=IMPECT_R) if i.gen_type == 1])
         info = np.random.choice(neighbour_info, size=len(self.gen_info),  replace=True)
         return self.mutate_gen_info(info)
 
     def get_local_env_volume_gr_rate(self):
         neighbours = [agent.gen_type for agent in self.model.grid.get_neighbors(self.pos, True, include_center=False, radius=ENV_R)]
-        popu, horz_popu = len(neighbours), np.sum(neighbours)
+        popu, horz_popu = len(neighbours), np.sum(neighbours)#???
         vert_popu = popu - horz_popu
         vert_rate = (VERT_MAX - vert_popu - ALPHA21 * horz_popu)/VERT_MAX
         horz_rate = (HORZ_MAX - horz_popu - ALPHA12 * vert_popu)/HORZ_MAX
@@ -272,7 +277,7 @@ class GenAgent(Agent):
     def check_env_press(self):
         press = self.model.cur_press
         coin = np.random.random()
-        if beta(np.mean(self.gen_info) - self.model.cur_press, 1)  < coin: 
+        if beta_death(np.mean(self.gen_info) - self.model.cur_press)  < coin: 
             self.lifetime = 0
 
     def check_life(self):
