@@ -29,15 +29,27 @@ chart1 = ChartModule([{"Label": "two type ratio (hor/total)",
 
 chart2 = ChartModule([{"Label": "horizontal generate mean prob",
                       "Color": "Red"}, 
-		      {"Label": "vertical generate mean prob", "Color": "Blue"}],
+		      {"Label": "horizontal generate env prob", 
+			"Color": "Blue"},
+		      {"Label": "horizontal generate self prob", 
+			"Color": "Pink"} ],
                       data_collector_name='datacollector')
 
-chart3 = ChartModule([{"Label": "horizontal gene mean info",
+chart3 = ChartModule([{"Label": "vertical generate mean prob",
+                      "Color": "Red"}, 
+		      {"Label": "vertical generate env prob", 
+			"Color": "Blue"},
+		      {"Label": "vertical generate self prob", 
+			"Color": "Pink"} ],
+                      data_collector_name='datacollector')
+
+
+chart4 = ChartModule([{"Label": "horizontal gene mean info",
                       "Color": "Red"}, 
 		      {"Label": "vertical gene mean info", "Color": "Blue"},
                            {"Label": "env press", "Color": "Black"}],
                       data_collector_name='datacollector')
-chart4 = ChartModule([{"Label": "horizontal gene max info",
+chart5 = ChartModule([{"Label": "horizontal gene max info",
                       "Color": "Red"}, 
           {"Label": "vertical gene max info", "Color": "Blue"},
                       {"Label": "horizontal gene min info",
@@ -47,12 +59,12 @@ chart4 = ChartModule([{"Label": "horizontal gene max info",
                            ],
                       data_collector_name='datacollector')
 
-chart5 = ChartModule([ {"Label": "vertical num", "Color": "Purple"},
+chart6 = ChartModule([ {"Label": "vertical num", "Color": "Purple"},
 			{"Label": "horizontal num", "Color": "Green"}],
                       data_collector_name='datacollector')
 
 
 server = ModularServer(GenModel,
-                       [grid, chart1, chart2, chart3, chart4, chart5],
+                       [grid, chart1, chart2, chart3, chart4, chart5, chart6],
                        "Gen Model",
                        {"N": 200  , 'width':100, 'height':100})
