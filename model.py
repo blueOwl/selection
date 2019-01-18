@@ -15,7 +15,9 @@ LIFE_TIME = 3
 MAX_GEN_TICK = 2001
 ENV_PRESS_PERIOD = 500
 MAX_CAPACITY = 1000
-IMPECT_R = 6
+IMPECT_R = 10
+#generate sus position
+#get genetic range
 ENV_R = 10
 ENV_STRESS_COF = 1
 MUTATION_VAR = 0.05
@@ -26,21 +28,24 @@ ALPHA = math.log(2) / math.log((T_MAX - T_MIN) / (T_OPT - T_MIN))
 #global var control env growth rate
 VERT_MAX = 200
 HORZ_MAX = 200
-ALPHA12 = 0.5
-ALPHA21 = 0.5
+ALPHA12 = 0.2
+ALPHA21 = 0.2
 #child position distribution
 POS_DIS = [2,1]
 #(.15, .3, .3, .15)
 
+TYPE_MAP = {0:'vert',
+            1:'horz'}
 def beta(T, tp):
     #if T < 0: T = -1 * T
-    beta_l = {0:1, 1:0.8}
+    tp = TYPE_MAP[tp]
+    beta_l = {	'vert':1, 
+		'horz':0.8}
     #tp is agent type, 0 is vertical, 1 is horizontal
     l = beta_l[tp]
     return l * ((2 * (T - T_MIN)**ALPHA *(T_OPT-T_MIN)** ALPHA) - (T - T_MIN) ** (2 * ALPHA)) / ((T_OPT - T_MIN)**(2 * ALPHA))
 
 def beta_death(T):
-   
     return ((2 * (T - T_MIN)**ALPHA *(T_OPT-T_MIN)** ALPHA) - (T - T_MIN) ** (2 * ALPHA)) / ((T_OPT - T_MIN)**(2 * ALPHA))
 
 
@@ -67,6 +72,18 @@ def compute_type_ratio(model):
     total = model.schedule.get_agent_count()
     return h_count * 1.0 / total
 
+def compute_mean_her_env_prob(model):
+    mean = np.mean([agent.env_gr_rate for agent in model.schedule.agents if agent.gen_type == 1])
+    print(mean)
+    return mean
+def compute_mean_her_self_prob(model):
+    return np.mean([agent.self_gen_cof for agent in model.schedule.agents if agent.gen_type == 1])
+def compute_mean_ver_env_prob(model):
+    return np.mean([agent.env_gr_rate for agent in model.schedule.agents if agent.gen_type == 0])
+def compute_mean_ver_self_prob(model):
+    return np.mean([agent.self_gen_cof for agent in model.schedule.agents if agent.gen_type == 0])
+#self.env_gr_rate * self.self_gen_cof
+
 def compute_mean_her_prob(model):
     return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 1])
 
@@ -74,10 +91,10 @@ def compute_mean_ver_prob(model):
     return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 0])
 
 def compute_her_num(model):
-    return len([agent.p for agent in model.schedule.agents if agent.gen_type == 1])
+    return len([agent for agent in model.schedule.agents if agent.gen_type == 1])
 
 def compute_ver_num(model):
-    return len([agent.p for agent in model.schedule.agents if agent.gen_type == 0])
+    return len([agent for agent in model.schedule.agents if agent.gen_type == 0])
 
 def compute_mean_her_geneinfo(model):
     return np.mean([np.mean(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 1])
@@ -130,6 +147,10 @@ class GenModel(Model):
         self.datacollector = DataCollector(
                 model_reporters = {"two type ratio (hor/total)": compute_type_ratio, 
                    "env press": get_cur_press,
+                   "vertical generate env prob": compute_mean_ver_env_prob,
+                   "vertical generate self prob": compute_mean_ver_self_prob,
+                   "horizontal generate env prob": compute_mean_her_env_prob,
+                   "horizontal generate self prob": compute_mean_her_self_prob,
                    "horizontal generate mean prob": compute_mean_her_prob,
                    "horizontal num": compute_her_num,
                    "vertical generate mean prob": compute_mean_ver_prob,
@@ -206,6 +227,8 @@ class GenAgent(Agent):
         else:
             self.gen_type = random.choice(range(2))
         self.p = 0
+        self.env_gr_rate = 0
+        self.self_gen_cof = 0
 
     def die(self):
         self.model.grid.remove_agent(self)
@@ -233,7 +256,9 @@ class GenAgent(Agent):
         vert_popu = popu - horz_popu
         vert_rate = (VERT_MAX - vert_popu - ALPHA21 * horz_popu)/VERT_MAX
         horz_rate = (HORZ_MAX - horz_popu - ALPHA12 * vert_popu)/HORZ_MAX
-        print(vert_rate, horz_rate)
+        #print(vert_rate, horz_rate)
+        #if self.gen_type == 1: print(HORZ_MAX, horz_popu, ALPHA12 * vert_popu)
+        #if self.gen_type == 1: print((HORZ_MAX - horz_popu - ALPHA12 * vert_popu)/HORZ_MAX)
         return (vert_rate, horz_rate)
 
 
@@ -268,11 +293,11 @@ class GenAgent(Agent):
     def get_gener_p(self):
     #total growth prob
     #enviroment size growth rate * genetic infor coef
-        env_gr_rate = self.get_local_env_volume_gr_rate()[self.gen_type]
+        self.env_gr_rate = self.get_local_env_volume_gr_rate()[self.gen_type]
         #self_gen_cof = 0.5 + two_curve(np.mean(self.gen_info)) * 0.5
-        self_gen_cof = beta(np.mean(self.gen_info) - self.model.cur_press, self.gen_type)
+        self.self_gen_cof = 1 * beta(np.mean(self.gen_info) - self.model.cur_press, self.gen_type)
         #return uni_gr_rate * self_gen_cof
-        return env_gr_rate * self_gen_cof
+        return self.env_gr_rate * self.self_gen_cof
 
     def check_env_press(self):
         press = self.model.cur_press
