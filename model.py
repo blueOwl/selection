@@ -128,7 +128,9 @@ class GenModel(Model):
         #self.her_max = MAX_CAPACITY
         #self.ver_max = MAX_CAPACITY
         #self.alpha12, self.alpha21 = 0.5, 0.5
-        self.env_press = (np.sin(np.linspace(0, np.pi * 2 * ENV_PRESS_PERIOD, MAX_GEN_TICK)) + 1 ) / 2 * ENV_STRESS_COF
+        #self.env_press = (np.sin(np.linspace(0, np.pi * 2 * ENV_PRESS_PERIOD, MAX_GEN_TICK)-0.5*np.pi) +1 ) / 2 * ENV_STRESS_COF#?????
+
+        self.env_press = (np.sin(np.linspace(0, np.pi * 2 * ENV_PRESS_PERIOD, MAX_GEN_TICK)) +1 ) / 2 * ENV_STRESS_COF#?????
         #this is how enviroment values generated
         #all values are chosen from a rescaled sin functions
         #total periods for this sin is ENV_PRESS_PERIOD
@@ -236,7 +238,7 @@ class GenAgent(Agent):
 
     @staticmethod
     def mutate_gen_info(info):#？？？mutate before resample
-        mu = np.array(list(map(range_filter(-1 * 2 * MUTATION_VAR, 2 * MUTATION_VAR), np.random.normal(0, MUTATION_VAR, MUT_GEN_LENGHT))))
+        mu = np.array(list(map(range_filter(-1 * 2 * MUTATION_VAR, 2 * MUTATION_VAR), np.random.normal(0, MUTATION_VAR, MUT_GEN_LENGHT))))#??
         indexes = np.array(range(GEN_INFO_SIZE))
         info[np.random.choice(indexes, MUT_GEN_LENGHT)] += mu 
         return np.array(list(map(range_filter(0,1), info)))
