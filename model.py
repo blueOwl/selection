@@ -9,7 +9,7 @@ from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
 
 GEN_INFO_SIZE = 10
-MUT_GEN_LENGHT = 10
+MUT_GEN_LENGHT = 2
 # gene info list length and mutate number per generation
 LIFE_TIME = 3
 MAX_GEN_TICK = 2001
@@ -73,22 +73,21 @@ def compute_type_ratio(model):
     return h_count * 1.0 / total
 
 def compute_mean_her_env_prob(model):
-    mean = np.mean([agent.env_gr_rate for agent in model.schedule.agents if agent.gen_type == 1])
-    print(mean)
-    return mean
+    data = [agent.env_gr_rate for agent in model.schedule.agents if agent.gen_type == 1 and agent.env_gr_rate != 0]
+    return np.mean(data)
 def compute_mean_her_self_prob(model):
-    return np.mean([agent.self_gen_cof for agent in model.schedule.agents if agent.gen_type == 1])
+    return np.mean([agent.self_gen_cof for agent in model.schedule.agents if agent.gen_type == 1 and agent.self_gen_cof != 0])
 def compute_mean_ver_env_prob(model):
-    return np.mean([agent.env_gr_rate for agent in model.schedule.agents if agent.gen_type == 0])
+    return np.mean([agent.env_gr_rate for agent in model.schedule.agents if agent.gen_type == 0 and agent.env_gr_rate != 0])
 def compute_mean_ver_self_prob(model):
-    return np.mean([agent.self_gen_cof for agent in model.schedule.agents if agent.gen_type == 0])
+    return np.mean([agent.self_gen_cof for agent in model.schedule.agents if agent.gen_type == 0 and agent.self_gen_cof != 0])
 #self.env_gr_rate * self.self_gen_cof
 
 def compute_mean_her_prob(model):
-    return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 1])
+    return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 1 and agent.p != 0])
 
 def compute_mean_ver_prob(model):
-    return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 0])
+    return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 0 and agent.p != 0])
 
 def compute_her_num(model):
     return len([agent for agent in model.schedule.agents if agent.gen_type == 1])
@@ -238,28 +237,30 @@ class GenAgent(Agent):
     def mutate_gen_info(info):#？？？mutate before resample
         mu = np.array(list(map(range_filter(-1 * 2 * MUTATION_VAR, 2 * MUTATION_VAR), np.random.normal(0, MUTATION_VAR, MUT_GEN_LENGHT))))
         indexes = np.array(range(GEN_INFO_SIZE))
-        info[np.random.choice(indexes, MUT_GEN_LENGHT)] += mu 
+        info[np.random.choice(indexes, MUT_GEN_LENGHT, replace=False)] += mu 
         return np.array(list(map(range_filter(0,1), info)))
 
     def get_gen_info_vetical(self):
         info = np.random.choice(self.gen_info, size=len(self.gen_info),  replace=True)
         return self.mutate_gen_info(info)
 
-    def get_gen_info_heri(self, pos):
+    def get_gen_info_heri(self):
+        pos = self.pos
         neighbour_info = np.concatenate([i.gen_info for i in self.model.grid.get_neighbors(pos, True, include_center=True, radius=IMPECT_R) if i.gen_type == 1])
         info = np.random.choice(neighbour_info, size=len(self.gen_info),  replace=True)
         return self.mutate_gen_info(info)
 
     def get_local_env_volume_gr_rate(self):
         neighbours = [agent.gen_type for agent in self.model.grid.get_neighbors(self.pos, True, include_center=False, radius=ENV_R)]
-        popu, horz_popu = len(neighbours), np.sum(neighbours)#???
+        popu, horz_popu = len(neighbours), sum(neighbours)#???
         vert_popu = popu - horz_popu
-        vert_rate = (VERT_MAX - vert_popu - ALPHA21 * horz_popu)/VERT_MAX
-        horz_rate = (HORZ_MAX - horz_popu - ALPHA12 * vert_popu)/HORZ_MAX
+        if self.gen_type == 0:
+            return (VERT_MAX - vert_popu - ALPHA21 * horz_popu)/VERT_MAX
+        else:
+            return (HORZ_MAX - horz_popu - ALPHA12 * vert_popu)/HORZ_MAX
         #print(vert_rate, horz_rate)
         #if self.gen_type == 1: print(HORZ_MAX, horz_popu, ALPHA12 * vert_popu)
         #if self.gen_type == 1: print((HORZ_MAX - horz_popu - ALPHA12 * vert_popu)/HORZ_MAX)
-        return (vert_rate, horz_rate)
 
 
     @staticmethod
@@ -285,7 +286,7 @@ class GenAgent(Agent):
         if self.gen_type == 0:
             gen_info = self.get_gen_info_vetical()
         else:
-            gen_info = self.get_gen_info_heri(pos)
+            gen_info = self.get_gen_info_heri()
         sus = GenAgent(self.model.get_uid(), self.model, next_gen_num, self.gen_type, gen_info)
         self.model.schedule.add(sus)
         self.model.grid.place_agent(sus, pos)
@@ -293,7 +294,7 @@ class GenAgent(Agent):
     def get_gener_p(self):
     #total growth prob
     #enviroment size growth rate * genetic infor coef
-        self.env_gr_rate = self.get_local_env_volume_gr_rate()[self.gen_type]
+        self.env_gr_rate = self.get_local_env_volume_gr_rate()
         #self_gen_cof = 0.5 + two_curve(np.mean(self.gen_info)) * 0.5
         self.self_gen_cof = 1 * beta(np.mean(self.gen_info) - self.model.cur_press, self.gen_type)
         #return uni_gr_rate * self_gen_cof
