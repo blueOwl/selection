@@ -13,7 +13,7 @@ MUT_GEN_LENGHT = 2
 # gene info list length and mutate number per generation
 LIFE_TIME = 3
 MAX_GEN_TICK = 2001
-ENV_PRESS_PERIOD = 500
+ENV_PRESS_PERIOD = 50
 MAX_CAPACITY = 1000
 IMPECT_R = 10
 #generate sus position
@@ -127,9 +127,9 @@ class GenModel(Model):
         #self.her_max = MAX_CAPACITY
         #self.ver_max = MAX_CAPACITY
         #self.alpha12, self.alpha21 = 0.5, 0.5
-        #self.env_press = (np.sin(np.linspace(0, np.pi * 2 * ENV_PRESS_PERIOD, MAX_GEN_TICK)-0.5*np.pi) +1 ) / 2 * ENV_STRESS_COF#?????
+        self.env_press = (np.sin(np.linspace(0, np.pi * 2 * ENV_PRESS_PERIOD, MAX_GEN_TICK)-0.5*np.pi) +1 ) / 2 * ENV_STRESS_COF#?????
 
-        self.env_press = (np.sin(np.linspace(0, np.pi * 2 * ENV_PRESS_PERIOD, MAX_GEN_TICK)) +1 ) / 2 * ENV_STRESS_COF#?????
+        #self.env_press = (np.sin(np.linspace(0, np.pi * 2 * ENV_PRESS_PERIOD, MAX_GEN_TICK)) +1 ) / 2 * ENV_STRESS_COF#?????
         #this is how enviroment values generated
         #all values are chosen from a rescaled sin functions
         #total periods for this sin is ENV_PRESS_PERIOD
@@ -206,7 +206,9 @@ class GenModel(Model):
 
     def step(self):
         #if (self.schedule.steps + 1) % 3 == 0:
-        #    self.press = True
+         #   self.press = True
+        #else:
+         #   self.press = False##selection every step, but can explore selection every k step
         self.press = True
         self.init_env()
         self.datacollector.collect(self)
