@@ -7,111 +7,8 @@ from mesa.space import MultiGrid, Grid
 from mesa import Agent, Model
 from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
-
-GEN_INFO_SIZE = 10
-MUT_GEN_LENGHT = 2
-# gene info list length and mutate number per generation
-LIFE_TIME = 3
-MAX_GEN_TICK = 2001
-ENV_PRESS_PERIOD = 50
-MAX_CAPACITY = 1000
-IMPECT_R = 10
-#generate sus position
-#get genetic range
-ENV_R = 10
-ENV_STRESS_COF = 1
-MUTATION_VAR = 0.05
-
-T_MAX, T_MIN, T_OPT = 1, -1, 0
-ALPHA = math.log(2) / math.log((T_MAX - T_MIN) / (T_OPT - T_MIN))
-
-#global var control env growth rate
-VERT_MAX = 200
-HORZ_MAX = 200
-ALPHA12 = 0.2
-ALPHA21 = 0.2
-#child position distribution
-POS_DIS = [2,1]
-#(.15, .3, .3, .15)
-
-TYPE_MAP = {0:'vert',
-            1:'horz'}
-def beta(T, tp):
-    #if T < 0: T = -1 * T
-    tp = TYPE_MAP[tp]
-    beta_l = {	'vert':1, 
-		'horz':0.8}
-    #tp is agent type, 0 is vertical, 1 is horizontal
-    l = beta_l[tp]
-    return l * ((2 * (T - T_MIN)**ALPHA *(T_OPT-T_MIN)** ALPHA) - (T - T_MIN) ** (2 * ALPHA)) / ((T_OPT - T_MIN)**(2 * ALPHA))
-
-def beta_death(T):
-    return ((2 * (T - T_MIN)**ALPHA *(T_OPT-T_MIN)** ALPHA) - (T - T_MIN) ** (2 * ALPHA)) / ((T_OPT - T_MIN)**(2 * ALPHA))
-
-
-def range_filter(start, end):
-    def f(x):
-        if x < start: 
-            return start
-        if x > end:
-            return end
-        return x
-    return f
-
-#def two_curve(x, l = 1):
- #   x = x  * 20 * -1 + 10
-  #  k = 0.4
-   # return l / (1 + np.exp(1) ** ((-k) * x)) * 0.5
-
-
-def get_cur_press(model):
-    return model.cur_press
-
-def compute_type_ratio(model):
-    h_count = np.sum([agent.gen_type for agent in model.schedule.agents])#？？？
-    total = model.schedule.get_agent_count()
-    return h_count * 1.0 / total
-
-def compute_mean_her_env_prob(model):
-    data = [agent.env_gr_rate for agent in model.schedule.agents if agent.gen_type == 1 and agent.env_gr_rate != 0]
-    return np.mean(data)
-def compute_mean_her_self_prob(model):
-    return np.mean([agent.self_gen_cof for agent in model.schedule.agents if agent.gen_type == 1 and agent.self_gen_cof != 0])
-def compute_mean_ver_env_prob(model):
-    return np.mean([agent.env_gr_rate for agent in model.schedule.agents if agent.gen_type == 0 and agent.env_gr_rate != 0])
-def compute_mean_ver_self_prob(model):
-    return np.mean([agent.self_gen_cof for agent in model.schedule.agents if agent.gen_type == 0 and agent.self_gen_cof != 0])
-#self.env_gr_rate * self.self_gen_cof
-
-def compute_mean_her_prob(model):
-    return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 1 and agent.p != 0])
-
-def compute_mean_ver_prob(model):
-    return np.mean([agent.p for agent in model.schedule.agents if agent.gen_type == 0 and agent.p != 0])
-
-def compute_her_num(model):
-    return len([agent for agent in model.schedule.agents if agent.gen_type == 1])
-
-def compute_ver_num(model):
-    return len([agent for agent in model.schedule.agents if agent.gen_type == 0])
-
-def compute_mean_her_geneinfo(model):
-    return np.mean([np.mean(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 1])
-
-def compute_mean_ver_geneinfo(model):
-    return np.mean([np.mean(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 0])
-
-def compute_max_her_geneinfo(model):
-    return np.mean([np.max(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 1])
-
-def compute_max_ver_geneinfo(model):
-    return np.mean([np.max(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 0])
-
-def compute_min_her_geneinfo(model):
-    return np.mean([np.min(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 1])
-
-def compute_min_ver_geneinfo(model):
-    return np.mean([np.min(agent.gen_info) for agent in model.schedule.agents if agent.gen_type == 0])
+from utils import *
+from settings import *
 
 class GenModel(Model):
     """A model with some number of agents."""
@@ -239,11 +136,13 @@ class GenAgent(Agent):
 
     @staticmethod
     def mutate_gen_info(info):#？？？mutate before resample
+        return info
+        '''
         mu = np.array(list(map(range_filter(-1 * 2 * MUTATION_VAR, 2 * MUTATION_VAR), np.random.normal(0, MUTATION_VAR, MUT_GEN_LENGHT))))#??
         indexes = np.array(range(GEN_INFO_SIZE))
         info[np.random.choice(indexes, MUT_GEN_LENGHT, replace=False)] += mu 
         return np.array(list(map(range_filter(0,1), info)))
-
+        '''
     def get_gen_info_vetical(self):
         info = np.random.choice(self.gen_info, size=len(self.gen_info),  replace=True)
         return self.mutate_gen_info(info)
@@ -319,15 +218,31 @@ class GenAgent(Agent):
             return False
         return True
     
+    def muta_genetic_info(self):
+        '''
+        individual mutate
+        1. mutate with prob MUTATION_THRES
+        2. mutate with fixed length MUT_GEN_LENGHT
+        3. mutate with truncated normal (0, MUTATION_VAR)
+        '''
+        coin = np.random.random()
+        if coin < MUTATION_THRES:
+            mu = np.array(list(map(range_filter(-1 * 2 * MUTATION_VAR, 2 * MUTATION_VAR), np.random.normal(0, MUTATION_VAR, MUT_GEN_LENGHT))))
+            indexes = np.array(range(GEN_INFO_SIZE))
+            self.gen_info[np.random.choice(indexes, MUT_GEN_LENGHT, replace=False)] += mu 
     def step(self):
         #agent behavior 
         # 1. check whether still alive
-        # 2. get generate child prob(self.get_gener_p) and decide whether generate child(self.gener_sus)
+        # 2. do mutation step
+        # 3. get generate child prob(self.get_gener_p) and decide whether generate child(self.gener_sus)
         self.lifetime -= 1
         if self.model.press:
             self.check_env_press()
         alive = self.check_life()
         if alive:
+            #mutation
+            self.muta_genetic_info()
+            #generate offspring
             coin = np.random.random()
             self.p = self.get_gener_p()
             if coin < self.p:
