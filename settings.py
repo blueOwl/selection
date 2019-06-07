@@ -2,7 +2,7 @@ import math
 
 GEN_INFO_SIZE = 10
 # gene info list length and mutate number per generation
-LIFE_TIME = 3
+LIFE_TIME = 5
 MAX_GEN_TICK = 2001
 ENV_PRESS_PERIOD = 50
 MAX_CAPACITY = 1000

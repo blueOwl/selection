@@ -9,10 +9,12 @@ from mesa.time import RandomActivation
 from mesa.datacollection import DataCollector
 from utils import *
 from settings import *
+import env_settings
 
+#for env settings see env_settings.py
 class GenModel(Model):
     """A model with some number of agents."""
-    def __init__(self, N, width, height):
+    def __init__(self, N, width, height, init_ratio=0.5):
         self.running = True
         self.num_agents = N
         self.grid = MultiGrid(width, height, True)
@@ -24,7 +26,7 @@ class GenModel(Model):
         #self.her_max = MAX_CAPACITY
         #self.ver_max = MAX_CAPACITY
         #self.alpha12, self.alpha21 = 0.5, 0.5
-        self.env_press = (np.sin(np.linspace(0, np.pi * 2 * ENV_PRESS_PERIOD, MAX_GEN_TICK)-0.5*np.pi) +1 ) / 2 * ENV_STRESS_COF#?????
+        self.env_press = env_settings.current_value
 
         #self.env_press = (np.sin(np.linspace(0, np.pi * 2 * ENV_PRESS_PERIOD, MAX_GEN_TICK)) +1 ) / 2 * ENV_STRESS_COF#?????
         #this is how enviroment values generated
@@ -33,8 +35,14 @@ class GenModel(Model):
         #total values number's are MAX_GEN_TICK
 
         # Create agents
+        coins = np.random.random(self.num_agents)
+        # for decide agent type
         for i in range(self.num_agents):
-            a = GenAgent(i, self, 0, gen_info=np.random.random(GEN_INFO_SIZE))
+            if coins[i] < init_ratio: 
+                agent_type = 0
+            else:
+                agent_type = 1
+            a = GenAgent(i, self, 0, gen_info=np.random.random(GEN_INFO_SIZE), gen_type=agent_type)
             self.schedule.add(a)
             # Add the agent to a random grid cell
             x = random.randrange(self.grid.width)
@@ -42,16 +50,17 @@ class GenModel(Model):
             self.grid.place_agent(a, (x, y))
 
         #collect data
+        '''
         self.datacollector = DataCollector(
                 model_reporters = {"two type ratio (hor/total)": compute_type_ratio, 
-                   "env press": get_cur_press,
-                   "vertical generate env prob": compute_mean_ver_env_prob,
-                   "vertical generate self prob": compute_mean_ver_self_prob,
-                   "horizontal generate env prob": compute_mean_her_env_prob,
-                   "horizontal generate self prob": compute_mean_her_self_prob,
-                   "horizontal generate mean prob": compute_mean_her_prob,
+                   #"env press": get_cur_press,
+                   #"vertical generate env prob": compute_mean_ver_env_prob,
+                   #"vertical generate self prob": compute_mean_ver_self_prob,
+                   #"horizontal generate env prob": compute_mean_her_env_prob,
+                   #"horizontal generate self prob": compute_mean_her_self_prob,
+                   #"horizontal generate mean prob": compute_mean_her_prob,
                    "horizontal num": compute_her_num,
-                   "vertical generate mean prob": compute_mean_ver_prob,
+                   #"vertical generate mean prob": compute_mean_ver_prob,
                    "vertical num": compute_ver_num,
                    "horizontal gene mean info": compute_mean_her_geneinfo,
                    "vertical gene mean info": compute_mean_ver_geneinfo,
@@ -60,6 +69,7 @@ class GenModel(Model):
                    "horizontal gene min info": compute_min_her_geneinfo,
                    "vertical gene min info": compute_min_ver_geneinfo
                     })
+         '''
 
 
    # def get_r(self):
@@ -108,9 +118,9 @@ class GenModel(Model):
          #   self.press = False##selection every step, but can explore selection every k step
         self.press = True
         self.init_env()
-        self.datacollector.collect(self)
+        '''self.datacollector.collect(self)'''
         print("population size: ", self.get_popu_size())
-        print("env pressure", self.cur_press)
+        #print("env pressure", self.cur_press)
         #self.gr_rate = self.get_gr_rate()
         #if self.press:print("env die")
         self.schedule.step()
