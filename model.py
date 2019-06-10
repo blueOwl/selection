@@ -6,6 +6,7 @@ import numpy as np
 from mesa.space import MultiGrid, Grid
 from mesa import Agent, Model
 from mesa.time import RandomActivation
+from customizeTime import RandomActivationWithMutation
 from mesa.datacollection import DataCollector
 from utils import *
 from settings import *
@@ -13,40 +14,48 @@ import env_settings
 
 #for env settings see env_settings.py
 class GenModel(Model):
-    """A model with some number of agents."""
+    """setting the agent for model"""
+    def get_agent_config(self):
+        return GenAgent
+    def get_env(self):
+        return env_settings.current_value
+
+    
     def __init__(self, N, width, height, init_ratio=0.5):
         self.running = True
         self.num_agents = N
         self.grid = MultiGrid(width, height, True)
-        self.schedule = RandomActivation(self)
+        self.schedule = RandomActivationWithMutation(self)
         self.uid = self.num_agents
+        self.agent = self.get_agent_config()
 
-        #model para
-        #self.r1, self.r2 = 1.0, 1.0
-        #self.her_max = MAX_CAPACITY
-        #self.ver_max = MAX_CAPACITY
-        #self.alpha12, self.alpha21 = 0.5, 0.5
-        self.env_press = env_settings.current_value
+        #pre-generate enviroment values
+        
 
-        #self.env_press = (np.sin(np.linspace(0, np.pi * 2 * ENV_PRESS_PERIOD, MAX_GEN_TICK)) +1 ) / 2 * ENV_STRESS_COF#?????
-        #this is how enviroment values generated
-        #all values are chosen from a rescaled sin functions
-        #total periods for this sin is ENV_PRESS_PERIOD
-        #total values number's are MAX_GEN_TICK
+        self.env_press = self.get_env()
+        
 
         # Create agents
         coins = np.random.random(self.num_agents)
+        used = []
+        pos = ()
         # for decide agent type
         for i in range(self.num_agents):
             if coins[i] < init_ratio: 
                 agent_type = 0
             else:
                 agent_type = 1
-            a = GenAgent(i, self, 0, gen_info=np.random.random(GEN_INFO_SIZE), gen_type=agent_type)
+            a = self.agent(i, self, 0, gen_info=np.random.random(GEN_INFO_SIZE), gen_type=agent_type)
             self.schedule.add(a)
             # Add the agent to a random grid cell
-            x = random.randrange(self.grid.width)
-            y = random.randrange(self.grid.height)
+            while True:
+            # make sure initial uniq position
+                x = random.randrange(self.grid.width)
+                y = random.randrange(self.grid.height)
+                if not (x, y) in used:
+                    pos = (x, y)
+                    used.append(pos)
+                    break
             self.grid.place_agent(a, (x, y))
 
         #collect data
@@ -119,7 +128,7 @@ class GenModel(Model):
         self.press = True
         self.init_env()
         '''self.datacollector.collect(self)'''
-        print("population size: ", self.get_popu_size())
+        print(self.schedule.steps ,"population size: ", self.get_popu_size())
         #print("env pressure", self.cur_press)
         #self.gr_rate = self.get_gr_rate()
         #if self.press:print("env die")
@@ -139,20 +148,21 @@ class GenAgent(Agent):
         self.p = 0
         self.env_gr_rate = 0
         self.self_gen_cof = 0
-
+        self.set_beta()
+    
+    def set_beta(self):
+        self.beta = beta
+        self.beta_death = beta_death
+        
     def die(self):
         self.model.grid.remove_agent(self)
         self.model.schedule.remove(self)
 
     @staticmethod
-    def mutate_gen_info(info):#？？？mutate before resample
+    def mutate_gen_info(info):
+        #mutate before resample
         return info
-        '''
-        mu = np.array(list(map(range_filter(-1 * 2 * MUTATION_VAR, 2 * MUTATION_VAR), np.random.normal(0, MUTATION_VAR, MUT_GEN_LENGHT))))#??
-        indexes = np.array(range(GEN_INFO_SIZE))
-        info[np.random.choice(indexes, MUT_GEN_LENGHT, replace=False)] += mu 
-        return np.array(list(map(range_filter(0,1), info)))
-        '''
+
     def get_gen_info_vetical(self):
         info = np.random.choice(self.gen_info, size=len(self.gen_info),  replace=True)
         return self.mutate_gen_info(info)
@@ -162,18 +172,6 @@ class GenAgent(Agent):
         neighbour_info = np.concatenate([i.gen_info for i in self.model.grid.get_neighbors(pos, True, include_center=True, radius=IMPECT_R) if i.gen_type == 1])
         info = np.random.choice(neighbour_info, size=len(self.gen_info),  replace=True)
         return self.mutate_gen_info(info)
-
-    def get_local_env_volume_gr_rate(self):
-        neighbours = [agent.gen_type for agent in self.model.grid.get_neighbors(self.pos, True, include_center=False, radius=ENV_R)]
-        popu, horz_popu = len(neighbours), sum(neighbours)#???
-        vert_popu = popu - horz_popu
-        if self.gen_type == 0:
-            return (VERT_MAX - vert_popu - ALPHA21 * horz_popu)/VERT_MAX
-        else:
-            return (HORZ_MAX - horz_popu - ALPHA12 * vert_popu)/HORZ_MAX
-        #print(vert_rate, horz_rate)
-        #if self.gen_type == 1: print(HORZ_MAX, horz_popu, ALPHA12 * vert_popu)
-        #if self.gen_type == 1: print((HORZ_MAX - horz_popu - ALPHA12 * vert_popu)/HORZ_MAX)
 
 
     @staticmethod
@@ -196,27 +194,25 @@ class GenAgent(Agent):
         neighborhood = self.model.grid.get_neighborhood(self.pos, True, include_center=False, radius=IMPECT_R)
         pos_idx = np.random.choice(range(len(neighborhood)), 1, p=self.get_pos_dis(len(neighborhood), POS_DIS), replace=False)
         pos = neighborhood[int(pos_idx)]
+        if not self.model.grid.is_cell_empty(pos): 
+            return#if cell is occupied, no reproduction
         if self.gen_type == 0:
             gen_info = self.get_gen_info_vetical()
         else:
             gen_info = self.get_gen_info_heri()
-        sus = GenAgent(self.model.get_uid(), self.model, next_gen_num, self.gen_type, gen_info)
+        sus = self.__class__(self.model.get_uid(), self.model, next_gen_num, self.gen_type, gen_info)
         self.model.schedule.add(sus)
         self.model.grid.place_agent(sus, pos)
-
+    
     def get_gener_p(self):
     #total growth prob
-    #enviroment size growth rate * genetic infor coef
-        self.env_gr_rate = self.get_local_env_volume_gr_rate()
-        #self_gen_cof = 0.5 + two_curve(np.mean(self.gen_info)) * 0.5
-        self.self_gen_cof = 1 * beta(np.mean(self.gen_info) - self.model.cur_press, self.gen_type)
-        #return uni_gr_rate * self_gen_cof
-        return self.env_gr_rate * self.self_gen_cof
+        self.self_gen_cof = 1 * self.beta(np.mean(self.gen_info) - self.model.cur_press, self.gen_type)
+        return self.self_gen_cof
 
     def check_env_press(self):
         press = self.model.cur_press
         coin = np.random.random()
-        if beta_death(np.mean(self.gen_info) - self.model.cur_press)  < coin: 
+        if self.beta_death(np.mean(self.gen_info) - self.model.cur_press)  < coin: 
             self.lifetime = 0
 
     def check_life(self):
@@ -229,17 +225,19 @@ class GenAgent(Agent):
         return True
     
     def muta_genetic_info(self):
+        pass
         '''
         individual mutate
         1. mutate with prob MUTATION_THRES
         2. mutate with fixed length MUT_GEN_LENGHT
         3. mutate with truncated normal (0, MUTATION_VAR)
-        '''
+        
         coin = np.random.random()
         if coin < MUTATION_THRES:
             mu = np.array(list(map(range_filter(-1 * 2 * MUTATION_VAR, 2 * MUTATION_VAR), np.random.normal(0, MUTATION_VAR, MUT_GEN_LENGHT))))
             indexes = np.array(range(GEN_INFO_SIZE))
             self.gen_info[np.random.choice(indexes, MUT_GEN_LENGHT, replace=False)] += mu 
+            '''
     def step(self):
         #agent behavior 
         # 1. check whether still alive
@@ -250,7 +248,7 @@ class GenAgent(Agent):
             self.check_env_press()
         alive = self.check_life()
         if alive:
-            #mutation
+            #indiviual mutation
             self.muta_genetic_info()
             #generate offspring
             coin = np.random.random()

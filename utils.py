@@ -50,7 +50,7 @@ def beta(T, tp):
     #if T < 0: T = -1 * T
     tp = TYPE_MAP[tp]
     beta_l = {	'vert':1, 
-		'horz':0.8}
+		'horz':1.0}
     #tp is agent type, 0 is vertical, 1 is horizontal
     l = beta_l[tp]
     return l * ((2 * (T - T_MIN)**ALPHA *(T_OPT-T_MIN)** ALPHA) - (T - T_MIN) ** (2 * ALPHA)) / ((T_OPT - T_MIN)**(2 * ALPHA))
@@ -77,3 +77,6 @@ def range_filter(start, end):
 def get_cur_press(model):
     return model.cur_press
 
+def compute_ratio(model):
+    agent_types = [agent.gen_type for agent in model.schedule.agents]
+    return 1 - (sum(agent_types) / len(agent_types))
