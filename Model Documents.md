@@ -32,7 +32,7 @@ Basic model. Check the correction of our agent base modeling.
 
 iter: 2000
 
-times: 400 * 9
+times: 100 * 9
 
 Based on initial ration.
 
@@ -61,9 +61,9 @@ As default.
 
 * ? Initial ration 0.5 : gen_prob in [0.2-0.8]
 
-Fixed. 0.5
+Fixed. 0.2 0.5 0.7
 #### 4. generate method
 Default.
 #### 5. env death method
 * ? Initial ration 0.5 : gen_prob in [0.2-0.8]
-Fixed 0.5
+Fixed 0.2 0.5 0.7
