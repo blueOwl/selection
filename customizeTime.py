@@ -9,6 +9,7 @@ def v_in_intv(v, interval):
     if v < interval[0]: return interval[0]
     return v
 
+
 class RandomActivationWithMutation(BaseScheduler):
     def pertub_gene(self, agent_key, gene_key):
         agent_key, gene_key = int(agent_key), int(gene_key)
@@ -44,9 +45,9 @@ class RandomActivationWithMutation(BaseScheduler):
 
         """
 	#version 0.8.5
-        self.mutate(MUTATION_PRO)
         for agent in self.agent_buffer(shuffled=True):
             agent.step()
+        self.mutate(MUTATION_PRO)
         self.steps += 1
         self.time += 1
         '''
@@ -59,3 +60,8 @@ class RandomActivationWithMutation(BaseScheduler):
         self.steps += 1
         self.time += 1
         '''
+
+class RandomActivationMutationNoConstrain(RandomActivationWithMutation):
+    def pertub_gene(self, agent_key, gene_key):
+        agent_key, gene_key = int(agent_key), int(gene_key)
+        self._agents[agent_key].gen_info[gene_key] += np.random.normal(0, POPU_MUTA_VAR)

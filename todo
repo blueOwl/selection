@@ -1,2 +1,11 @@
 1. no env change, and how balance changes. time -> 5 to see whether matches lk model
 2. no env change, how inital influence final ratio 
+
+06/29
+env linear increase
+ver hor gene mean and min max
+ver hor ratio
+step wise record 
+
+mutation type change -> remove interval | using 2 sd instead
+

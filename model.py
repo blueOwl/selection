@@ -6,7 +6,7 @@ import numpy as np
 from mesa.space import MultiGrid, Grid
 from mesa import Agent, Model
 from mesa.time import RandomActivation
-from customizeTime import RandomActivationWithMutation
+from customizeTime import RandomActivationWithMutation, RandomActivationMutationNoConstrain
 from mesa.datacollection import DataCollector
 from utils import *
 from settings import *
@@ -17,22 +17,31 @@ class GenModel(Model):
     """setting the agent for model"""
     def get_agent_config(self):
         return GenAgent
-    def get_env(self):
+    def init_env(self):
         return env_settings.current_value
+    def model_level_data_collect(self):pass
 
+    def model_level_record_init(self):pass
+    
+    def model_level_report(self):pass
+
+    def get_schedule(self):
+        return RandomActivationWithMutation
     
     def __init__(self, N, width, height, init_ratio=0.5):
+        self.env_idx = 0
         self.running = True
         self.num_agents = N
         self.grid = MultiGrid(width, height, True)
-        self.schedule = RandomActivationWithMutation(self)
+        self.schedule = self.get_schedule()(self)
         self.uid = self.num_agents
         self.agent = self.get_agent_config()
+        self.model_level_record_init()
 
         #pre-generate enviroment values
         
 
-        self.env_press = self.get_env()
+        self.env_press = self.init_env()
         
 
         # Create agents
@@ -117,22 +126,26 @@ class GenModel(Model):
 
 
 
-    def init_env(self):
-        self.cur_press, self.env_press = self.env_press[0], self.env_press[1:]
-
+    def get_env(self):
+        self.cur_press = self.env_press[self.env_idx]
+        self.env_idx += 1
+    def write_model_level_record(self):
+        pass
+    
     def step(self):
         #if (self.schedule.steps + 1) % 3 == 0:
          #   self.press = True
         #else:
          #   self.press = False##selection every step, but can explore selection every k step
         self.press = True
-        self.init_env()
+        self.get_env()
         '''self.datacollector.collect(self)'''
         print(self.schedule.steps ,"population size: ", self.get_popu_size())
         #print("env pressure", self.cur_press)
         #self.gr_rate = self.get_gr_rate()
         #if self.press:print("env die")
         self.schedule.step()
+        self.write_model_level_record()
 
 class GenAgent(Agent):
     def __init__(self, unique_id, model, generation_num, gen_type = None, gen_info = None):
@@ -244,15 +257,20 @@ class GenAgent(Agent):
         # 2. do mutation step
         # 3. get generate child prob(self.get_gener_p) and decide whether generate child(self.gener_sus)
         self.lifetime -= 1
+
+        #indiviual mutation
+        self.muta_genetic_info()
+
+        #generate offspring
+        coin = np.random.random()
+        self.p = self.get_gener_p()
+        if coin < self.p:
+            self.gener_sus()
+   
+        #check env 
         if self.model.press:
             self.check_env_press()
-        alive = self.check_life()
-        if alive:
-            #indiviual mutation
-            self.muta_genetic_info()
-            #generate offspring
-            coin = np.random.random()
-            self.p = self.get_gener_p()
-            if coin < self.p:
-                self.gener_sus()
+
+        #check alife
+        self.check_life()
 
