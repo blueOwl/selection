@@ -34,7 +34,7 @@ iter: 2000
 
 times: 100 * 9
 
-Based on initial ration.
+Based on initial ratio.
 
 #### 2. Model name and agent name: 
 basic\_mnodel and basic\_agent
@@ -67,3 +67,46 @@ Default.
 #### 5. env death method
 * ? Initial ration 0.5 : gen_prob in [0.2-0.8]
 Fixed 0.2 0.5 0.7
+
+
+
+
+## 2. M_2
+
+### model level
+#### 1. Description:
+Linear increasing temperature. Various increasing speed, slope [0.1, 0.9] 
+iter: 2000
+
+times: 100 * 9
+
+
+#### 2. Model name and agent name: 
+linear\_mnodel and linear\_agent
+#### 3. Env setting :
+Linear increasing, varing slopes
+#### 4. Step statistic level data :
+population size, population fitness: beta(mean gene value - enviornment)
+#### 5. Mutation method:
+Default, variance=population variance, truncated at 2 sd
+#### 6. Initial Way:
+vertical only, horizontal only, both vertical and horizontal presented
+#### 7. Initial ratio: 
+0.5
+### Agent level
+
+#### 1. lifetime :
+Inf.
+
+#### 2. genetic info size:
+As default.
+
+#### 3. generate prob
+As default.
+
+#### 4. generate method
+Default.
+
+#### 5. env death method
+As default.
+
