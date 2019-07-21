@@ -69,13 +69,53 @@ Default.
 Fixed 0.2 0.5 0.7
 
 
-
-
 ## 2. M_2
 
 ### model level
 #### 1. Description:
-Linear increasing temperature. Various increasing speed, slope [0.1, 0.9] 
+Fixed stress, horizontal line, 
+Env_pressure=0,0.5,1
+iter: 2000
+
+times: 100 * 9
+
+#### 2. Model name and agent name: 
+fixed\_mnodel and fixed\_agent
+#### 3. Env setting :
+Fixed at 0, 0.5, 1
+#### 4. Step statistic level data :
+population size, population fitness: beta(mean gene value - enviornment)
+#### 5. Mutation method:
+Default, variance=population variance, truncated at 2 sd.
+
+#### 6. Initial Way:
+As default
+#### 7. Initial ratio: 
+0.5
+### Agent level
+
+#### 1. lifetime :
+Inf.
+
+#### 2. genetic info size:
+As default.
+
+#### 3. generate prob
+As default.
+
+#### 4. generate method
+Default.
+
+#### 5. env death method
+As default.
+
+
+## 3. M_3
+
+### model level
+#### 1. Description:
+Linear increasing temperature. 
+Various increasing speed, slope [0.01，0.05,0.1,0.5，1] with various mutation.
 iter: 2000
 
 times: 100 * 9
@@ -88,7 +128,9 @@ Linear increasing, varing slopes
 #### 4. Step statistic level data :
 population size, population fitness: beta(mean gene value - enviornment)
 #### 5. Mutation method:
-Default, variance=population variance, truncated at 2 sd
+Default, variance=population variance, truncated at 2 sd.
+
+Various mutation variance: [0.01, 0.05, 0.1, 0.2] 看下default initial情况下mutation variance（应该是1/12）
 #### 6. Initial Way:
 vertical only, horizontal only, both vertical and horizontal presented
 #### 7. Initial ratio: 
@@ -109,4 +151,52 @@ Default.
 
 #### 5. env death method
 As default.
+
+???如何控制取点的密度   可能应该改成相邻两个点的差值大小
+或者规定一共2000步，决定第2000步的环境压力大小
+
+## 4. M_4
+
+### model level
+#### 1. Description:
+Linear increasing fluctuating temperature. 
+iter: 2000
+
+times: 100 * 9
+
+
+#### 2. Model name and agent name: 
+linear_fluc\_mnodel and linear_fluc\_agent
+#### 3. Env setting :
+Linear flucutating increasing, varing mean tredn slopes
+#### 4. Step statistic level data :
+population size, population fitness: beta(mean gene value - enviornment)
+#### 5. Mutation method:
+Default, variance=population variance, truncated at 2 sd.
+
+Various mutation: [0.01, 0.05, 0.1, 0.2] 看下default 情况下mutation variance
+#### 6. Initial Way:
+Defualt
+#### 7. Initial ratio: 
+0.5
+### Agent level
+
+#### 1. lifetime :
+Inf.
+
+#### 2. genetic info size:
+As default.
+
+#### 3. generate prob
+As default.
+
+#### 4. generate method
+Default.
+
+#### 5. env death method
+As default.
+
+
+
+
 
