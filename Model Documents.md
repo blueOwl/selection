@@ -22,6 +22,7 @@
 #### 4. generate method
 #### 5. env death method
 
+------------------------------------------------------------
 
 ## 1. M_1
 
@@ -68,7 +69,7 @@ Default.
 * ? Initial ration 0.5 : gen_prob in [0.2-0.8]
 Fixed 0.2 0.5 0.7
 
-
+------------------------------------------------------------
 ## 2. M_2
 
 ### model level
@@ -110,6 +111,7 @@ Default.
 As default.
 
 
+------------------------------------------------------------
 ## 3. M_3
 
 ### model level
@@ -129,8 +131,8 @@ Linear increasing, varing slopes
 population size, population fitness: beta(mean gene value - enviornment)
 #### 5. Mutation method:
 Default, variance=population variance, truncated at 2 sd.
-
-Various mutation variance: [0.01, 0.05, 0.1, 0.2] 看下default initial情况下mutation variance（应该是1/12）
+slope:[0.001, 0.01, 0.1, 0.2]，或者是每一个tick之间温差 
+Various mutation variance: [0.001, 0.01, 0.1, 0.2，1/12] 看下default initial情况下mutation variance（应该是1/12）
 #### 6. Initial Way:
 vertical only, horizontal only, both vertical and horizontal presented
 #### 7. Initial ratio: 
@@ -155,11 +157,15 @@ As default.
 ???如何控制取点的密度   可能应该改成相邻两个点的差值大小
 或者规定一共2000步，决定第2000步的环境压力大小
 
+
+------------------------------------------------------------
 ## 4. M_4
 
 ### model level
 #### 1. Description:
 Linear increasing fluctuating temperature. 
+y=ax+(-1)^（x-1）*b, 取点在波峰波谷，
+a=0.01，b= [0.001, 0.01, 0.1, 0.2，1/12]
 iter: 2000
 
 times: 100 * 9
@@ -197,6 +203,6 @@ Default.
 As default.
 
 
-
+------------------------------------------------------------
 
 
