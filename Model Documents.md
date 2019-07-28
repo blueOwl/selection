@@ -46,7 +46,7 @@ population size
 #### 5. Mutation method:
 Disabled.
 #### 6. Initial Way:
-As default.
+2000 individuals each.
 #### 7. Initial ratio: 
 [0.1 - 0.9]
 
@@ -60,14 +60,12 @@ As default.
 
 #### 3. generate prob
 
-* ? Initial ration 0.5 : gen_prob in [0.2-0.8]
-
-Fixed. 0.2 0.5 0.7
+Fixed. 0.3 0.5 0.7
 #### 4. generate method
 Default.
 #### 5. env death method
-* ? Initial ration 0.5 : gen_prob in [0.2-0.8]
-Fixed 0.2 0.5 0.7
+Fixed 0.1 0.3 0.5  
+(0.2对应0.3的出生率，0.3对应0.5的出生率，0.5对应0.7的出生率）
 
 ------------------------------------------------------------
 ## 2. M_2
