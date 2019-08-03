@@ -1,6 +1,10 @@
 import math
 
 GEN_INFO_SIZE = 50
+GENE_INIT_MEAN = 0.5
+GENE_INIT_SD = 0.1
+GENE_INIT_LOW = 4 * GENE_INIT_SD
+GENE_INIT_HIGH = -4 * GENE_INIT_SD 
 # gene info list length and mutate number per generation
 LIFE_TIME = 5
 MAX_GEN_TICK = 2001
@@ -16,13 +20,11 @@ ENV_STRESS_COF = 1
 MUTATION_VAR = 0.05
 MUTATION_THRES = 0.01
 MUT_GEN_LENGHT = 2
-
-
 '''
-POPU_MUTA_LOW = -1
-POPU_MUTA_HIGH = 1
 POPU_MUTA_VAR = 0.1
 MUTATION_PRO = 0.01
+POPU_MUTA_LOW = 2 * POPU_MUTA_VAR
+POPU_MUTA_HIGH = -2 * POPU_MUTA_VAR
 #beta function settings
 T_MAX = 1
 T_MIN = -1
