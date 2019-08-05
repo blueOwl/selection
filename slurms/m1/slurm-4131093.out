@@ -1,0 +1,18 @@
+---------- Begin SLURM Prolog ----------
+Job ID:        4131093
+Username:      zhuliu
+Accountname:   lc_lc3
+Name:          7.sbatch
+Partition:     cmb
+Nodelist:      hpc[3753,3864]
+TasksPerNode:  1,3
+CPUsPerTask:   5
+TMPDIR:        /tmp/4131093.cmb
+SCRATCHDIR:    /staging/scratch/4131093
+Cluster:       uschpc
+HSDA Account:  false
+---------- 2019-08-03 08:02:53 ---------
+Sat Aug  3 08:02:53 PDT 2019
+/auto/pmd-01/zhuliu/project/ye/selection/env/lib/python3.6/importlib/_bootstrap.py:205: RuntimeWarning: numpy.dtype size changed, may indicate binary incompatibility. Expected 96, got 88
+  return f(*args, **kwds)
+0it [00:00, ?it/s]1it [20:40:56, 74456.75s/it]2it [23:06:00, 54730.78s/it]11it [35:04:09, 39747.86s/it]12it [35:38:22, 28439.31s/it]17it [37:07:01, 20226.66s/it]

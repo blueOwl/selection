@@ -7,7 +7,7 @@ GENE_INIT_LOW = 4 * GENE_INIT_SD
 GENE_INIT_HIGH = -4 * GENE_INIT_SD 
 # gene info list length and mutate number per generation
 LIFE_TIME = 5
-MAX_GEN_TICK = 2001
+MAX_GEN_TICK = 20000
 ENV_PRESS_PERIOD = 50
 MAX_CAPACITY = 1000
 IMPECT_R = 10

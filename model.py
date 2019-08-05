@@ -29,7 +29,8 @@ class GenModel(Model):
         return RandomActivationWithMutation
     
     def get_gene_init(self, gene_size):
-        return np.clip(np.random.normal(loc=settings.GENE_INIT_MEAN, scale=settings.GENE_INIT_SD, gene_size), settings.GENE_INIT_LOW, settings.GENE_INIT_HIGH)
+        return [0] * gene_size
+        #return np.clip(np.random.normal(loc=settings.GENE_INIT_MEAN, scale=settings.GENE_INIT_SD, gene_size), settings.GENE_INIT_LOW, settings.GENE_INIT_HIGH)
     
     def __init__(self, N, width, height, init_ratio=0.5):
         self.env_idx = 0
@@ -57,7 +58,7 @@ class GenModel(Model):
                 agent_type = 0
             else:
                 agent_type = 1
-            a = self.agent(i, self, 0, gen_info=get_gene_init(GEN_INFO_SIZE), gen_type=agent_type)
+            a = self.agent(i, self, 0, gen_info=self.get_gene_init(GEN_INFO_SIZE), gen_type=agent_type)
             self.schedule.add(a)
             # Add the agent to a random grid cell
             while True:
