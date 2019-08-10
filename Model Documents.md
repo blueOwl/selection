@@ -85,10 +85,10 @@ Fixed at 0, 0.5, 1
 #### 4. Step statistic level data :
 population size, population fitness: beta(mean gene value - enviornment)
 #### 5. Mutation method:
-Default, variance=population variance, truncated at 2 sd.
+Default, variance=[0.001,0.01,0.1] truncated at 2 sd.
 
 #### 6. Initial Way:
-As default
+Initial variance:0.01, 0.1, 0.2, 0.5
 #### 7. Initial ratio: 
 0.5
 ### Agent level
@@ -115,7 +115,7 @@ As default.
 ### model level
 #### 1. Description:
 Linear increasing temperature. 
-Various increasing speed, slope [0.01，0.05,0.1,0.5，1] with various mutation.
+Various increasing speed, slope [0.001，0.01,0.05,0.1,0.2，0.5] with various mutation.
 iter: 2000
 
 times: 100 * 9
@@ -128,9 +128,9 @@ Linear increasing, varing slopes
 #### 4. Step statistic level data :
 population size, population fitness: beta(mean gene value - enviornment)
 #### 5. Mutation method:
-Default, variance=population variance, truncated at 2 sd.
-slope:[0.001, 0.01, 0.1, 0.2]，或者是每一个tick之间温差 
-Various mutation variance: [0.001, 0.01, 0.1, 0.2，1/12] 看下default initial情况下mutation variance（应该是1/12）
+ variance=[0.001,0.01,0.1,0.2], truncated at 2 sd.
+slope:[0.001，0.01,0.05,0.1,0.2，0.5]，或者是每一个tick之间温差 
+
 #### 6. Initial Way:
 vertical only, horizontal only, both vertical and horizontal presented
 #### 7. Initial ratio: 
