@@ -162,8 +162,11 @@ As default.
 ### model level
 #### 1. Description:
 Linear increasing fluctuating temperature. 
-y=ax+(-1)^（x-1）*b, 取点在波峰波谷，
-a=0.01，b= [0.001, 0.01, 0.1, 0.2，1/12]
+x=seq(0,max_tick,1)
+coe=rep(c(0,1),50)
+y=a*x+0.5+coe*(-b*a)
+b>1,b是振幅
+a=[0.001，0.01,0.05,0.1,0.2，0.5] ，b= []
 iter: 2000
 
 times: 100 * 9
@@ -178,7 +181,7 @@ population size, population fitness: beta(mean gene value - enviornment)
 #### 5. Mutation method:
 Default, variance=population variance, truncated at 2 sd.
 
-Various mutation: [0.01, 0.05, 0.1, 0.2] 看下default 情况下mutation variance
+Various mutation: ？
 #### 6. Initial Way:
 Defualt
 #### 7. Initial ratio: 
