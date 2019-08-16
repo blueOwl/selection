@@ -85,10 +85,10 @@ Fixed at 0, 0.5, 1
 #### 4. Step statistic level data :
 population size, population fitness: beta(mean gene value - enviornment)
 #### 5. Mutation method:
-Default, variance=[0.001,0.01,0.1] truncated at 2 sd.
+Default, variance=[0.001,0.01] truncated at 2 sd.
 
 #### 6. Initial Way:
-Initial variance:0.01, 0.1, 0.2, 0.5
+Initial variance: 0.1,
 #### 7. Initial ratio: 
 0.5
 ### Agent level
