@@ -1,5 +1,5 @@
 from mesa.time import BaseScheduler
-from settings import *
+import settings
 import numpy as np
 import random
 
@@ -15,7 +15,7 @@ class RandomActivationWithMutation(BaseScheduler):
         agent_key, gene_key = int(agent_key), int(gene_key)
         #print(agent_key, gene_key)
         v = self._agents[agent_key].gen_info[gene_key]
-        v += v_in_intv(np.random.normal(0, POPU_MUTA_VAR), (POPU_MUTA_LOW, POPU_MUTA_HIGH))
+        v += v_in_intv(np.random.normal(0, settings.POPU_MUTA_SD), (settings.POPU_MUTA_LOW, settings.POPU_MUTA_HIGH))
         self._agents[agent_key].gen_info[gene_key] = v_in_intv(v, (0, 1))
         
     def mutate(self, prob):
@@ -28,12 +28,12 @@ class RandomActivationWithMutation(BaseScheduler):
 	5. add perturbation to certain gene
 	"""
         keys = list(self._agents.keys())
-        keys_length = len(keys) * GEN_INFO_SIZE
+        keys_length = len(keys) * settings.GEN_INFO_SIZE
         indicators = np.random.binomial(size=keys_length, n=1, p=prob)
         samples = np.where(indicators)[0]
         #samples = np.random.choice(np.arange(keys_length), int(np.floor(prob * keys_length)))
         #get n random samples where n = floor(prob * total_length)
-        (agent_key_idxs, gene_keys) = np.divmod(samples,  GEN_INFO_SIZE)
+        (agent_key_idxs, gene_keys) = np.divmod(samples,  settings.GEN_INFO_SIZE)
         for i in range(len(agent_key_idxs)):
             self.pertub_gene(keys[agent_key_idxs[i]], gene_keys[i])
 
@@ -47,7 +47,7 @@ class RandomActivationWithMutation(BaseScheduler):
 	#version 0.8.5
         for agent in self.agent_buffer(shuffled=True):
             agent.step()
-        self.mutate(MUTATION_PRO)
+        self.mutate(settings.MUTATION_PRO)
         self.steps += 1
         self.time += 1
         '''
@@ -64,4 +64,9 @@ class RandomActivationWithMutation(BaseScheduler):
 class RandomActivationMutationNoConstrain(RandomActivationWithMutation):
     def pertub_gene(self, agent_key, gene_key):
         agent_key, gene_key = int(agent_key), int(gene_key)
-        self._agents[agent_key].gen_info[gene_key] += np.random.normal(0, POPU_MUTA_VAR)
+        self._agents[agent_key].gen_info[gene_key] += np.random.normal(0, settings.POPU_MUTA_SD)
+        
+class RandomActivationMutationWithConstrain(RandomActivationWithMutation):
+    def pertub_gene(self, agent_key, gene_key):
+        agent_key, gene_key = int(agent_key), int(gene_key)
+        self._agents[agent_key].gen_info[gene_key] += np.clip(np.random.normal(settings.INIT_MEAN, settings.INIT_SD), settings.INIT_LOW, settings.INIT_HIGH)

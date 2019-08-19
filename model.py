@@ -9,7 +9,7 @@ from mesa.time import RandomActivation
 from customizeTime import RandomActivationWithMutation, RandomActivationMutationNoConstrain
 from mesa.datacollection import DataCollector
 from utils import *
-from settings import *
+import settings 
 import env_settings
 
 #for env settings see env_settings.py
@@ -29,8 +29,8 @@ class GenModel(Model):
         return RandomActivationWithMutation
     
     def get_gene_init(self, gene_size):
-        return [0] * gene_size
-        #return np.clip(np.random.normal(loc=settings.GENE_INIT_MEAN, scale=settings.GENE_INIT_SD, gene_size), settings.GENE_INIT_LOW, settings.GENE_INIT_HIGH)
+        #return [0] * gene_size
+        return np.clip(np.random.normal(loc=settings.GENE_INIT_MEAN, scale=settings.GENE_INIT_SD, size=gene_size), settings.GENE_INIT_LOW, settings.GENE_INIT_HIGH)
     
     def __init__(self, N, width, height, init_ratio=0.5):
         self.env_idx = 0
@@ -155,7 +155,7 @@ class GenAgent(Agent):
     def __init__(self, unique_id, model, generation_num, gen_type = None, gen_info = None):
         super().__init__(unique_id, model)
         self.generation_num = generation_num
-        self.lifetime = LIFE_TIME
+        self.lifetime = settings.LIFE_TIME
         self.gen_info = gen_info
         if gen_type != None:
             self.gen_type = gen_type
@@ -186,7 +186,7 @@ class GenAgent(Agent):
 
     def get_gen_info_heri(self):
         pos = self.pos
-        neighbour_info = np.concatenate([i.gen_info for i in self.model.grid.get_neighbors(pos, True, include_center=True, radius=IMPECT_R) if i.gen_type == 1])
+        neighbour_info = np.concatenate([i.gen_info for i in self.model.grid.get_neighbors(pos, True, include_center=True, radius=settings.IMPECT_R) if i.gen_type == 1])
         info = np.random.choice(neighbour_info, size=len(self.gen_info),  replace=True)
         return self.mutate_gen_info(info)
 

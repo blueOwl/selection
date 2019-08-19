@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+# result and tmp
+tmp/
+res/
+slurms/
