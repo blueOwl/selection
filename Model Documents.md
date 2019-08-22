@@ -83,7 +83,7 @@ fixed\_mnodel and fixed\_agent
 #### 3. Env setting :
 Fixed at 0, 0.5, 1
 #### 4. Step statistic level data :
-population size, population fitness: beta(mean gene value - enviornment)
+population size, population fitness: mean (beta( gene value - enviornment)), population variance, mean gene value
 #### 5. Mutation method:
 Default, variance=[0.001,0.01] truncated at 2 sd.
 
@@ -126,7 +126,7 @@ linear\_mnodel and linear\_agent
 #### 3. Env setting :
 Linear increasing, varing slopes
 #### 4. Step statistic level data :
-population size, population fitness: beta(mean gene value - enviornment)
+population size, population fitness: mean (beta( gene value - enviornment)), population variance, mean gene value
 #### 5. Mutation method:
  variance=[0.001,0.01,0.1,0.2], truncated at 2 sd.
 slope:[0.001，0.01,0.05,0.1,0.2，0.5]，或者是每一个tick之间温差 
@@ -166,7 +166,7 @@ x=seq(0,max_tick,1)
 coe=rep(c(0,1),50)
 y=a*x+0.5+coe*(-b*a)
 b>1,b是振幅
-a=[0.001，0.01,0.05,0.1,0.2，0.5] ，b= []
+a=[0.01] ，b= []
 iter: 2000
 
 times: 100 * 9
@@ -177,11 +177,9 @@ linear_fluc\_mnodel and linear_fluc\_agent
 #### 3. Env setting :
 Linear flucutating increasing, varing mean tredn slopes
 #### 4. Step statistic level data :
-population size, population fitness: beta(mean gene value - enviornment)
+population size, population fitness: mean (beta( gene value - enviornment)), population variance, mean gene value
 #### 5. Mutation method:
-Default, variance=population variance, truncated at 2 sd.
-
-Various mutation: ？
+mutation variance:0.1,0.01,0.001,truncated at 2 sd
 #### 6. Initial Way:
 Defualt
 #### 7. Initial ratio: 
@@ -206,4 +204,37 @@ As default.
 
 ------------------------------------------------------------
 
+## 5. M_5
 
+### model level
+#### 1. Description:
+Randomly fluctuating environment. Stress is a random number between [0,1] each step
+
+#### 2. Model name and agent name: 
+Random_fluc\_mnodel and Random_fluc\_agent
+#### 3. Env setting :
+Random number between [0,1]
+#### 4. Step statistic level data :
+population size, population fitness: mean (beta( gene value - enviornment)), population variance, mean gene value
+#### 5. Mutation method:
+mutation variance:0.1,0.01,0.001,truncated at 2 sd
+#### 6. Initial Way:
+Defualt
+#### 7. Initial ratio: 
+0.5
+### Agent level
+
+#### 1. lifetime :
+1,5,Inf
+
+#### 2. genetic info size:
+As default.
+
+#### 3. generate prob
+As default.
+
+#### 4. generate method
+Default.
+
+#### 5. env death method
+As default.
