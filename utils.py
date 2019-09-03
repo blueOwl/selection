@@ -1,5 +1,11 @@
 import numpy as np
+import os
 from settings import * 
+
+def check_path(path):
+    if not os.path.exists(path): os.mkdir(path)
+    return path
+
 def compute_type_ratio(model):
     h_count = np.sum([agent.gen_type for agent in model.schedule.agents])#？？？
     total = model.schedule.get_agent_count()
