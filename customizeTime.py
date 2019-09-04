@@ -12,11 +12,13 @@ def v_in_intv(v, interval):
 
 class RandomActivationWithMutation(BaseScheduler):
     def pertub_gene(self, agent_key, gene_key):
+        '''
         agent_key, gene_key = int(agent_key), int(gene_key)
         #print(agent_key, gene_key)
         v = self._agents[agent_key].gen_info[gene_key]
         v += v_in_intv(np.random.normal(0, settings.POPU_MUTA_SD), (settings.POPU_MUTA_LOW, settings.POPU_MUTA_HIGH))
-        self._agents[agent_key].gen_info[gene_key] = v_in_intv(v, (0, 1))
+        self._agents[agent_key].gen_info[gene_key] = v_in_intv(v, (0, 1))'''
+        pass
         
     def mutate(self, prob):
         """
@@ -69,4 +71,4 @@ class RandomActivationMutationNoConstrain(RandomActivationWithMutation):
 class RandomActivationMutationWithConstrain(RandomActivationWithMutation):
     def pertub_gene(self, agent_key, gene_key):
         agent_key, gene_key = int(agent_key), int(gene_key)
-        self._agents[agent_key].gen_info[gene_key] += np.clip(np.random.normal(settings.INIT_MEAN, settings.INIT_SD), settings.INIT_LOW, settings.INIT_HIGH)
+        self._agents[agent_key].gen_info[gene_key] += np.clip(np.random.normal(0, settings.POPU_MUTA_SD), settings.POPU_MUTA_LOW, settings.POPU_MUTA_HIGH)

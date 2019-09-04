@@ -30,7 +30,7 @@ class GenModel(Model):
     
     def get_gene_init(self, gene_size):
         #return [0] * gene_size
-        return np.clip(np.random.normal(loc=settings.GENE_INIT_MEAN, scale=settings.GENE_INIT_SD, size=gene_size), settings.GENE_INIT_LOW, settings.GENE_INIT_HIGH)
+        return np.clip(np.random.normal(loc=settings.INIT_MEAN, scale=settings.INIT_SD, size=gene_size), settings.INIT_LOW, settings.INIT_HIGH)
     
     def __init__(self, N, width, height, init_ratio=0.5):
         self.env_idx = 0

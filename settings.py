@@ -1,10 +1,7 @@
 import math
 
 GEN_INFO_SIZE = 50
-GENE_INIT_MEAN = 0.5
-GENE_INIT_SD = 0.1
-GENE_INIT_LOW = 4 * GENE_INIT_SD
-GENE_INIT_HIGH = -4 * GENE_INIT_SD 
+
 # gene info list length and mutate number per generation
 LIFE_TIME = float('inf')
 MAX_GEN_TICK = 20000
@@ -21,8 +18,9 @@ MUTATION_VAR = 0.05
 MUTATION_THRES = 0.01
 MUT_GEN_LENGHT = 2
 '''
-POPU_MUTA_SD = 0.1
+
 MUTATION_PRO = 0.001
+POPU_MUTA_SD = 0.1
 POPU_MUTA_LOW = -2 * POPU_MUTA_SD
 POPU_MUTA_HIGH = 2 * POPU_MUTA_SD
 
