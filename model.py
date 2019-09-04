@@ -46,7 +46,7 @@ class GenModel(Model):
         
 
         self.env_press = self.init_env()
-        
+        self.cur_press = self.env_press[0]
 
         # Create agents
         coins = np.random.random(self.num_agents)
@@ -162,10 +162,10 @@ class GenAgent(Agent):
             #0 is vertical, 1 is herizontal
         else:
             self.gen_type = random.choice(range(2))
-        self.p = 0
         self.env_gr_rate = 0
         self.self_gen_cof = 0
         self.set_beta()
+        self.p = self.get_gener_p()
     
     def set_beta(self):
         self.beta = beta
