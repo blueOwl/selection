@@ -3,7 +3,9 @@ import os
 from settings import * 
 
 def check_path(path):
-    if not os.path.exists(path): os.mkdir(path)
+    if not os.path.exists(path): 
+        try:os.mkdir(path)
+        except:pass
     return path
 
 def compute_type_ratio(model):
