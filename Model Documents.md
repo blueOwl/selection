@@ -260,7 +260,7 @@ population size, population fitness: mean (beta( gene value - enviornment)), pop
 Default, variance=[0.001,0.01,0.05,0.1] truncated at 2 sd.
 
 #### 6. Initial Way:
-
+grid 50*50, N=1000,maxstep=4000
 #### 7. Initial ratio: 
 0.5
 ### Agent level
