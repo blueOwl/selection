@@ -238,3 +238,45 @@ Default.
 
 #### 5. env death method
 As default.
+
+
+
+## 2. M_6
+
+### model level
+#### 1. Description:
+Fluctuating temperature
+
+
+#### 2. Model name and agent name: 
+fluctuating\_mnodel and fluctuating\_agent
+#### 3. Env setting :
+step change speed:0.0001,0.001,0.01,0.1,0.5,1
+constrainted in [0,1]
+
+#### 4. Step statistic level data :
+population size, population fitness: mean (beta( gene value - enviornment)), population variance, mean gene value, curr_stress
+#### 5. Mutation method:
+Default, variance=[0.001,0.01,0.05,0.1] truncated at 2 sd.
+
+#### 6. Initial Way:
+
+#### 7. Initial ratio: 
+0.5
+### Agent level
+
+#### 1. lifetime :
+1,5,inf
+#### 2. genetic info size:
+As default.
+
+#### 3. generate prob
+As default.
+
+#### 4. generate method
+Default.
+
+#### 5. env death method
+As default.
+
+
